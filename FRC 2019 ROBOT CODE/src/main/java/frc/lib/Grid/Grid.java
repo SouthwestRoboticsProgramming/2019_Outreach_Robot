@@ -1,4 +1,4 @@
-package frc.robot.Grid;
+package frc.lib.Grid;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -10,9 +10,6 @@ import frc.lib.Looper.Looper;
 import frc.robot.Robot;
 import frc.robot.sensors.ADIS16448_IMU;
 
-/**
- * Add your docs here.
- */
 public class Grid extends Subsystem {
   private double acceleration = 1;
   private Position position = new Position();
@@ -201,10 +198,9 @@ public class Grid extends Subsystem {
     }
     Loop loop = new Loop(){
       @Override public void onStop() {}
-      @Override public void onStart() {
-        trackPosition();
-      }
-      @Override public void onLoop() {}
+      @Override public void onLoop() {trackPosition();}
+      @Override public void onStart() {}
+      
     };
     looper = new Looper(loop, refreshTime);
     looper.start();
