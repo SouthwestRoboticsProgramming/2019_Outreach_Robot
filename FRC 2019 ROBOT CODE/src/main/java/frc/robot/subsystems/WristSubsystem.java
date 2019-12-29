@@ -13,6 +13,7 @@ import frc.robot.commands.ManualWristControl;
 public class WristSubsystem extends Subsystem {
 
   public boolean tunable = false;
+  private boolean init = false;
 
   private WPI_TalonSRX wristMaster;
 
@@ -49,6 +50,12 @@ public class WristSubsystem extends Subsystem {
     wristUpperLimitSwitch = new DigitalInput(RobotMap.armWristUpperLimitSwitch);
   }
 
+  public void init() {
+    wristMaster.setSelectedSensorPosition((int)Robot.ShuffleBoard.wristStartingPos.getDouble(0));
+    Robot.WristSubsystem.calibrateWrist();
+    init = true;
+  }
+
   public void calibrateWrist() {
     double previousPosition = getWristPosition();
     wristMaster.set(1);
@@ -57,7 +64,7 @@ public class WristSubsystem extends Subsystem {
     while (wristLowerLimitSwitch.get()) {}
     wristMaster.stopMotor();
     double currentPosition = getWristPosition();
-    wristOffset = previousPosition - currentPosition + .05;
+    wristOffset = previousPosition - currentPosition + .1;
     // wristMaster.set(.1);
     // while (wristPosition() < wristOffset) {
     // System.out.println("wristPosition = " + wristPosition() + " wrist offset = " + wristOffset);
@@ -89,7 +96,7 @@ public class WristSubsystem extends Subsystem {
     
     //upper soft limit
     if (getWristPosition() >= .8 && wristOutput >= 0 && wristLimitBypass) {
-        wristOutput = (wristOutput / (getWristPosition() * 3)); 
+        wristOutput = (wristOutput / (getWristPosition() * 2)); 
         if (getWristPosition() >= 1) {
           wristOutput = 0;
           Robot.ShuffleBoard.wristUpperSoftLimit.setValue(true);
@@ -100,7 +107,7 @@ public class WristSubsystem extends Subsystem {
 
     //lower soft limit
     if (getWristPosition() <= .2 && wristOutput <= 0 && wristLimitBypass) {
-      wristOutput = (wristOutput / (Math.abs(1 - getWristPosition()) * 3)); 
+      wristOutput = (wristOutput / (Math.abs(1 - getWristPosition()) * 2)); 
       if (getWristPosition() <= 0) {
         wristOutput = 0;
         Robot.ShuffleBoard.wristLowerSoftLimit.setValue(true);
@@ -110,7 +117,7 @@ public class WristSubsystem extends Subsystem {
     }
 
     //send "armOutput" to motors
-    if (!Robot.oi.isNoArm) {
+    if (!Robot.oi.isNoArm || init) {
       wristMaster.set(wristOutput);
     } else {
       wristMaster.set(0);

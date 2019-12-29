@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.Servo;
+import frc.robot.Robot;
 import frc.robot.RobotMap;
 
 public class CameraServoSubsystem extends Subsystem {
@@ -16,8 +17,12 @@ public class CameraServoSubsystem extends Subsystem {
     cameraServo = new Servo(RobotMap.cameraServoPort);
   }
 
+  public void init() {
+    setCameraAngle((int)Robot.ShuffleBoard.cameraFrontAngle.getDouble(0));
+  }
+
   public void setCameraAngle(int angle) {
-    cameraServo.setAngle(angle);
+      cameraServo.setAngle(angle);
   }
 
   @Override

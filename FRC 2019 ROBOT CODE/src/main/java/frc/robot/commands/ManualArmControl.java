@@ -19,9 +19,7 @@ public class ManualArmControl extends Command {
   @Override
   protected void execute() {
  
-  Robot.armSubsystem.armControl(Robot.oi.manipulator.getY(), Robot.oi.armLimitBypassWristLock.get());
-  Robot.armSubsystem.armEncoderUpperReset(Robot.oi.manipulator.getY(), Robot.oi.manipulator.getPOV());
-  Robot.armSubsystem.armEncoderLowerReset(Robot.oi.manipulator.getY(), Robot.oi.manipulator.getPOV());
+  Robot.armSubsystem.armControl(Robot.oi.armControl(), Robot.oi.armLimitBypass());
   
   }
 

@@ -11,6 +11,7 @@ import frc.robot.commands.ManualArmControl;
 
 public class ArmSubsystem extends Subsystem {
   public boolean tunable = false;
+  private boolean init = false;
 
   private WPI_TalonSRX armMaster;
 
@@ -39,6 +40,11 @@ public class ArmSubsystem extends Subsystem {
     
   }
 
+  public void init() {
+    armMaster.setSelectedSensorPosition((int)Robot.ShuffleBoard.armStartingPos.getDouble(0));
+    init = true;
+  }
+
   public double getArmRawEncoder() {
     return armMaster.getSelectedSensorPosition();
   }
@@ -50,13 +56,16 @@ public class ArmSubsystem extends Subsystem {
   //Manualy move arm
   public void armControl(double armSpeed, boolean armLimitBypass) {
     double armMove = ((-armSpeed) * Robot.ShuffleBoard.armSpeed.getDouble(RobotMap.defaultArmSpeed));
+    // double armMove = ((-armSpeed) * RobotMap.defaultArmSpeed);
 
     if (Robot.oi.isOutreachMode) {
       armMove = armMove * Robot.ShuffleBoard.outreachModeArmSpeed.getDouble(RobotMap.defaultOutreachArmSpeed);
+      // armMove = armMove * RobotMap.defaultOutreachArmSpeed;
     } 
 
     //Arm smoothing
     double armFinal = getArmOutput() + ((armMove - getArmOutput()) * Robot.ShuffleBoard.armSmooth.getDouble(RobotMap.defaultArmSmooth));
+    // double armFinal = getArmOutput() + ((armMove - getArmOutput()) * RobotMap.defaultArmSmooth);
 
     //Start driveMorer, and armBrake
     driveMoter(armFinal, armLimitBypass);
@@ -67,7 +76,7 @@ public class ArmSubsystem extends Subsystem {
     
     //upper soft limit
     if (getArmPercentage() >= .8 && armOutput >= 0 && !armLimitBypass) {
-      armOutput = (armOutput / (getArmPercentage() * 4)); 
+      armOutput = (armOutput / (getArmPercentage() * 2)); 
       Robot.ShuffleBoard.armUpperSoftLimit.setValue(true);
     } else {
       Robot.ShuffleBoard.armUpperSoftLimit.setValue(false);
@@ -106,7 +115,7 @@ public class ArmSubsystem extends Subsystem {
     armBrake(armOutput);
 
     //send "armOutput" to motors
-    if (!Robot.oi.isNoArm) {
+    if (!Robot.oi.isNoArm || init) {
       armMaster.set(armOutput);
     } else {
       armMaster.set(0);

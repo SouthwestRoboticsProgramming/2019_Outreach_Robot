@@ -17,7 +17,7 @@ public class ManualExtentionControl extends Command {
   @Override
   protected void execute() {
 
-    Robot.extentionSubsystem.extendControl(Robot.oi.armExtend.get(), Robot.oi.armRetract.get(), Robot.oi.wristExtentionlimitBypass.get());
+    Robot.extentionSubsystem.extendControl(Robot.oi.extentionControl(), Robot.oi.wristExtentionlimitBypass());
     Robot.extentionSubsystem.extentionEncoderLowerReset();
 
   }

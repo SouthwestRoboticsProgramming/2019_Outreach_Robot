@@ -8,7 +8,6 @@ import frc.robot.Robot;
 import frc.robot.RobotMap;
 
 public class RobotClimbSubsystem extends Subsystem {
-
   private Solenoid robotLiftPistonExtend;
   private Solenoid robotLiftPistonRetract;
 
@@ -31,15 +30,21 @@ public class RobotClimbSubsystem extends Subsystem {
     rampPistonRetract.set(true);
   }
 
+  public void init() {
+    robotLiftPistonExtend.set(false);
+    robotLiftPistonRetract.set(true);
+    rampPistonExtend.set(false);
+    rampPistonRetract.set(true);
+  }
+
   //lift robot
-  public void liftRobot() {
-    boolean robotLifted = robotLiftPistonExtend.get();
-    robotLiftPistonExtend.set(robotLifted);
-    robotLiftPistonRetract.set(!robotLifted);
+  public void setLiftRobot(boolean lift) {
+    robotLiftPistonExtend.set(lift);
+    robotLiftPistonRetract.set(!lift);
     Robot.ShuffleBoard.solenoidLiftExtend.setValue(robotLiftPistonExtend.get());
-    Robot.ShuffleBoard.solenoidLiftRetract .setValue(robotLiftPistonRetract.get());
+    Robot.ShuffleBoard.solenoidLiftRetract.setValue(robotLiftPistonRetract.get());
   }  
-  
+
   //deploy ramps
   public void rampDeploy() {
     rampPistonExtend.set(true);
@@ -53,6 +58,10 @@ public class RobotClimbSubsystem extends Subsystem {
     rampPistonRetract.set(true);
     Robot.ShuffleBoard.solenoidRampsExtend.setValue(rampPistonExtend.get());
     Robot.ShuffleBoard.solenoidRampsRetract.setValue(rampPistonRetract.get());
+  }
+
+  public boolean getRobotLifted() {
+    return robotLiftPistonExtend.get();
   }
 
   @Override

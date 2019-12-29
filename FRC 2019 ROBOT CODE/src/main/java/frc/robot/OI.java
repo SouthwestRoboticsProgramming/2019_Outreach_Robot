@@ -1,107 +1,144 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.buttons.JoystickButton;
-import edu.wpi.first.wpilibj.command.Command;
+import frc.lib.Controller.Axis;
+import frc.lib.Controller.Buttons;
+import frc.lib.Controller.Controller;
+import frc.lib.Controller.ControllerSet;
+import frc.lib.Controller.MappedController;
 import frc.robot.commands.DeployRamps;
-import frc.robot.commands.LiftRobot;
 import frc.robot.commands.PresentPositions;
 import frc.robot.commands.SetCameraAngle;
-import frc.robot.commands.SetNoArm;
-import frc.robot.commands.SetOutreachMode;
-import frc.robot.sensors.ADIS16448_IMU;
+import frc.robot.commands.SetVacuum;
+import frc.robot.commands.ToggleLiftRobot;
+import frc.robot.commands.ToggleNoArm;
+import frc.robot.commands.ToggleOutreachMode;
 
 public class OI {
   public boolean isOutreachMode = false;
   public boolean isNoArm = false;
-  public boolean followLine = false;
 
-  public Joystick manipulator = new Joystick(0);
-  public Joystick left = new Joystick(1);
-  public Joystick right = new Joystick(2);
+  public Controller controller = new Controller();
+    public ControllerSet threeJoy = new ControllerSet();
+      private MappedController manipulator = new MappedController(0);
+      private MappedController left = new MappedController(1);
+      private MappedController right = new MappedController(2);
+    public ControllerSet xbox = new ControllerSet();
+      private MappedController xBox = new MappedController(0);
+  public OI() {
+    threeJoy.addMappedController(manipulator, left, right);
+      manipulator.mapButton(Buttons.armBypass, 6)
+        .mapButton(Buttons.extendArm, 5)
+        .mapButton(Buttons.extentionWristBypass, 4)
+        .mapButton(Buttons.preset1, 7)
+        .mapButton(Buttons.preset2, 8)
+        .mapButton(Buttons.preset3, 9)
+        .mapButton(Buttons.preset4, 10)
+        .mapButton(Buttons.preset5, 11)
+        .mapButton(Buttons.preset6, 12)
+        .mapButton(Buttons.retractArm, 3)
+        .mapButton(Buttons.vacuumOff, 2)
+        .mapButton(Buttons.vacuumOn, 1)
+        .mapAxis(Axis.armRotate, 0)
+        .mapAxis(Axis.wristRotate, 0);
+      left.mapButton(Buttons.deployRamps, 2)
+        .mapButton(Buttons.liftRobot, 4)
+        .mapButton(Buttons.limelightFollow, 1)
+        .mapAxis(Axis.leftDrive, 0);
+      right.mapButton(Buttons.cameraFaceFront, 3)
+        .mapButton(Buttons.cameraFaceBack, 2)
+        .mapButton(Buttons.noArm, 0)
+        .mapButton(Buttons.outreachMode, 8)
+        .mapButton(Buttons.rightControl, 1)
+        .mapAxis(Axis.rightDrive, 0);
+    xbox.addMappedController(xBox);
+      xBox.mapAxis(Axis.centerDrive, 0)
+      .mapAxis(Axis.turnDrive, 0)
+      .mapAxis(Axis.armRotate, 0)
+      .mapAxis(Axis.wristRotate, 0)
+      .mapButton(Buttons.extendArm, 0)
+      .mapButton(Buttons.retractArm, 0)
+      .mapButton(Buttons.quickTurn, 0)
+      .mapButton(Buttons.vacuumOn, 0)
+      .mapButton(Buttons.vacuumOff, 0);
 
-  // LEFT DRIVE
-    public JoystickButton lineFollowButton = new JoystickButton(left, RobotMap.buttonLineFollow);
-  
-  // RIGHT DRIVE
-    public JoystickButton rightControlButton = new JoystickButton(right, RobotMap.buttonRightDriveControl);
-  
+    controller.getButton(Buttons.preset1).whenPressed(new PresentPositions(1));
+    controller.getButton(Buttons.preset2).whenPressed(new PresentPositions(2));
+    controller.getButton(Buttons.preset3).whenPressed(new PresentPositions(3));
+    controller.getButton(Buttons.preset4).whenPressed(new PresentPositions(4));
+    controller.getButton(Buttons.preset5).whenPressed(new PresentPositions(5));
+    controller.getButton(Buttons.preset6).whenPressed(new PresentPositions(6));
+    controller.getButton(Buttons.preset7).whenPressed(new PresentPositions(7));
+
+    // LIFT / RAMPS
+    controller.getButton(Buttons.liftRobot).whenPressed(new ToggleLiftRobot());
+    controller.getButton(Buttons.deployRamps).whenPressed(new DeployRamps());
+
+    // OUTREACH MODE / NO ARM
+    controller.getButton(Buttons.outreachMode).whenPressed(new ToggleOutreachMode());
+    controller.getButton(Buttons.noArm).whenPressed(new ToggleNoArm());
+
+    // CAMERA SERVO
+    controller.getButton(Buttons.cameraFaceFront).whenPressed(new SetCameraAngle((int)Robot.ShuffleBoard.cameraFrontAngle.getDouble(RobotMap.cameraFaceFrontAngle)));
+    controller.getButton(Buttons.cameraFaceBack).whenPressed(new SetCameraAngle((int)Robot.ShuffleBoard.cameraBackAngle.getDouble(RobotMap.cameraFaceBackAngle)));
+
+    // VACUUM
+    controller.getButton(Buttons.vacuumOn).whenPressed(new SetVacuum(Robot.ShuffleBoard.vacuumPumpSpeed.getDouble(RobotMap.defaultVacuumPumpSpeed)));
+    controller.getButton(Buttons.vacuumOff).whenPressed(new SetVacuum(0));
+  }
+
+  // TWO DRIVE
+  public double leftDrive() {
+    return controller.getAxis(Axis.leftDrive);
+  }
+
+  public double rightDrive() {
+    return controller.getAxis(Axis.rightDrive);
+  }
+
+  public boolean LimelightControl() {
+    return controller.getButton(Buttons.limelightFollow).get();
+  }
+
+  public boolean rightControl() {
+    return controller.getButton(Buttons.rightControl).get();
+  }
+
+  // ONE DRIVE
+  public double oneDrive() {
+    return controller.getAxis(Axis.centerDrive);
+  }
+
+  public double oneTurn() {
+    return controller.getAxis(Axis.turnDrive);
+  }
+
+  public boolean oneQuickTurn() {
+    return controller.getButton(Buttons.quickTurn).get();
+  }
+
   // ARM
-    public JoystickButton wristExtentionlimitBypass = new JoystickButton(manipulator, RobotMap.wristExtentionlimitBypass);
-    public JoystickButton armLimitBypassWristLock = new JoystickButton(manipulator, RobotMap.armlimitBypassWristLock);
+  public double armControl() {
+    return controller.getAxis(Axis.armRotate);
+  }
+
+  public boolean armLimitBypass() {
+    return controller.getButton(Buttons.armBypass).get();
+  }
 
   // EXTENTION
-    public JoystickButton armExtend = new JoystickButton(manipulator, RobotMap.buttonArmExtendPort);
-    public JoystickButton armRetract = new JoystickButton(manipulator, RobotMap.buttonArmRetractPort);
+  public double extentionControl() {
+    double output = 0;
+    if (controller.getButton(Buttons.extendArm).get()) {output += 1;}
+    if (controller.getButton(Buttons.retractArm).get()) {output -= 1;}
+    return output;
+  }
 
-  // VACUUM PUMPS
-    public JoystickButton VacuumPumpOn = new JoystickButton(manipulator, RobotMap.buttonVacuumPumpOnPort);
-    public JoystickButton VacuumPumpOff = new JoystickButton(manipulator, RobotMap.buttonVacuumPumpOffPort);
-      
-  // LIFT ROBOT
-    public JoystickButton robotLift = new JoystickButton(left, RobotMap.buttonLiftRobotPort);
+  public boolean wristExtentionlimitBypass() {
+    return controller.getButton(Buttons.extentionWristBypass).get();
+  }
 
-  // DEPLOY RAMPS
-    public JoystickButton deployRamps = new JoystickButton(left, RobotMap.buttonDeployRampPort);
-
-  // CAMERA SERVO
-    public JoystickButton CameraServoFront = new JoystickButton(right, RobotMap.buttonCameraFaceFront);
-    public JoystickButton CameraServoBack = new JoystickButton(right, RobotMap.buttonCameraFaceBack);
-
-  // OUTREACH MODE
-    public JoystickButton outreachMode = new JoystickButton(right, RobotMap.buttonOutreachMode);
-
-  // NO ARM
-    public JoystickButton noArm = new JoystickButton(right, RobotMap.buttonNoArm);
-
-  // ENCODER RESET
-    // public JoystickButton upL = new JoystickButton(joystickEncoderReset, 14);
-
-  // PRESET POSITIONS
-    public JoystickButton pickUpHatch = new JoystickButton (manipulator, RobotMap.PickUpHatchPort);
-    public JoystickButton pickUpBall = new JoystickButton(manipulator, RobotMap.pickUpBallPort);
-    public JoystickButton pickUpBallOffFloor = new JoystickButton(manipulator, RobotMap.pickUpBallOffFloorPort);
-    public JoystickButton placeHatch = new JoystickButton(manipulator, RobotMap.placeHatchPort);
-    public JoystickButton placeBallInRocket = new JoystickButton(manipulator, RobotMap.placeBallInRocketPort);
-    public JoystickButton placeBallInCargoShip = new JoystickButton(manipulator, RobotMap.placeBallInCargoShipPort);
-    public JoystickButton armVerticle = new JoystickButton(manipulator, RobotMap.armVerticlePort);
-
-  public final ADIS16448_IMU gyro = new ADIS16448_IMU();
-
-  public OI() {
-    
-    Command pickUpHatch = new PresentPositions(1);
-    this.pickUpHatch.whenPressed(pickUpHatch);
-    Command pickUpBall = new PresentPositions(2);
-    this.pickUpBall.whenPressed(pickUpBall);
-    Command pickUpBallOffFloor = new PresentPositions(3);
-    this.pickUpBallOffFloor.whenPressed(pickUpBallOffFloor);
-    Command placeHatch = new PresentPositions(4);
-    this.placeHatch.whenPressed(placeHatch);
-    Command placeBallInRocket = new PresentPositions(5);
-    this.placeBallInRocket.whenPressed(placeBallInRocket);
-    Command placeBallInCargoShip = new PresentPositions(6);
-    this.placeBallInCargoShip.whenPressed(placeBallInCargoShip);
-    Command armVerticle = new PresentPositions(7);
-    this.armVerticle.whenPressed(armVerticle); 
-
-    Command robotLift = new LiftRobot();
-    this.robotLift.whenPressed(robotLift);
-
-    Command deployRamps = new DeployRamps();
-    this.deployRamps.whenPressed(deployRamps);
-
-    Command outreachMode = new SetOutreachMode();
-    this.outreachMode.whenPressed(outreachMode);
-
-    Command noArm = new SetNoArm();
-    this.noArm.whenPressed(noArm);
-
-    Command CameraServoFront = new SetCameraAngle(RobotMap.cameraFaceFrontAngle);
-    this.CameraServoFront.whenPressed(CameraServoFront);
-
-    Command CameraServoBack = new SetCameraAngle(RobotMap.cameraFaceBackAngle);
-    this.CameraServoBack.whenPressed(CameraServoBack);
-
+  // WRIST
+  public double wristControl() {
+    return controller.getAxis(Axis.wristRotate);
   }
 }

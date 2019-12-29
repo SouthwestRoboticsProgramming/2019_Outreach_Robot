@@ -10,13 +10,6 @@ public class Limelight{
     return NetworkTableInstance.getDefault().getTable("limelight");
   }
 
-  public void LimelightDefault() {
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3); 
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("stream").setNumber(2); 
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(0);
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").setNumber(0);
-  }
-
   public double limelightX() {
     NetworkTableEntry tx = limelightNetworkTable().getEntry("tx");
     return tx.getDouble(0.0);

@@ -12,7 +12,8 @@ import frc.robot.commands.ManualExtentionControl;
 
 public class ExtentionSubsystem extends Subsystem {
 
-	public boolean tunable = false;
+  public boolean tunable = false;
+  private boolean init = false;
 
   private WPI_TalonSRX extentionMaster;
 
@@ -35,6 +36,11 @@ public class ExtentionSubsystem extends Subsystem {
     extentionLowerLimitSwitch = new DigitalInput(RobotMap.armExtentionLowerLimitSwitch);
   }
 
+  public void init() {
+    extentionMaster.setSelectedSensorPosition((int)Robot.ShuffleBoard.extentionStartingPos.getDouble(0));
+    init = true;
+  }
+
   public double getExtentionRawEncoder() {
     return extentionMaster.getSelectedSensorPosition();
   }
@@ -44,14 +50,16 @@ public class ExtentionSubsystem extends Subsystem {
   }
 
   //extention manual drive
-  public void extendControl(Boolean extend, boolean retract, boolean extentionLimitBypass) {
+  public void extendControl(double extentionControl, boolean extentionLimitBypass) {
       final double offset = .1;
       //set "extentionSpeed" to extend
       double extentionSpeed;
-      if (extend) {
-        extentionSpeed = Robot.ShuffleBoard.extentionSpeed.getDouble(RobotMap.defaultExtentionSpeed) + offset;
-      } else if (retract) {
-        extentionSpeed = -Robot.ShuffleBoard.extentionSpeed.getDouble(RobotMap.defaultExtentionSpeed) - offset;
+      if (extentionControl > 0) {
+        extentionSpeed = (extentionControl * Robot.ShuffleBoard.extentionSpeed.getDouble(RobotMap.defaultExtentionSpeed)) + offset;
+        // extentionSpeed = RobotMap.defaultExtentionSpeed + offset;
+      } else if (extentionControl < 0) {
+        extentionSpeed = (extentionControl * -Robot.ShuffleBoard.extentionSpeed.getDouble(RobotMap.defaultExtentionSpeed)) - offset;
+        // extentionSpeed = -RobotMap.defaultExtentionSpeed - offset;
       } else {
         extentionSpeed = 0;
       }
@@ -61,10 +69,12 @@ public class ExtentionSubsystem extends Subsystem {
 
       if (Robot.oi.isOutreachMode) {
         extentionMove = extentionMove * Robot.ShuffleBoard.extentionSmooth.getDouble(RobotMap.defaultExtentionSmooth);
+        // extentionMove = extentionMove * RobotMap.defaultExtentionSmooth;
       }
 
       //extention smoothing
-      double extentionFinal = getExtentionOutput() + ((extentionMove - getExtentionOutput())* Robot.ShuffleBoard.extentionSmooth.getDouble(RobotMap.defaultExtentionSmooth));
+      double extentionFinal = getExtentionOutput() + ((extentionMove - getExtentionOutput()) * Robot.ShuffleBoard.extentionSmooth.getDouble(RobotMap.defaultExtentionSmooth));
+      // double extentionFinal = getExtentionOutput() + ((extentionMove - getExtentionOutput())* RobotMap.defaultExtentionSmooth);
 
       //send extentionFinal to ouput
       driveMoter(extentionFinal, extentionLimitBypass);
@@ -96,8 +106,8 @@ public class ExtentionSubsystem extends Subsystem {
     }
 
     // sends extentionOutput to motor
-    if (!Robot.oi.isNoArm) {
-      extentionMaster.set(extentionOutput);
+    if (!Robot.oi.isNoArm || init) {
+      // extentionMaster.set(extentionOutput);
     } else {
       extentionMaster.set(0);
     }

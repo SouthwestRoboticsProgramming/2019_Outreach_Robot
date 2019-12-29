@@ -68,6 +68,7 @@ public class ShuffleBoard{
             public NetworkTableEntry driveRightControlLeftJoyEffectiveness = driveTune.addPersistent("driveRightControlLeftJoyEffectiveness", 0).getEntry();
             public NetworkTableEntry driveSpeed = driveTune.addPersistent("driveSpeed", 0).getEntry();
             public NetworkTableEntry driveSmooth = driveTune.addPersistent("driveSmooth", 0).getEntry();
+            public NetworkTableEntry cheezyDrive = driveTune.addPersistent("cheezyDrive", true).getEntry();
 
         private ShuffleboardLayout armTune = Tune.getLayout("armTune", BuiltInLayouts.kList);
             private ShuffleboardLayout armPID = armTune.getLayout("armPID", BuiltInLayouts.kList);
@@ -75,9 +76,10 @@ public class ShuffleBoard{
                 public NetworkTableEntry armI = armPID.addPersistent("armPID-I", 0).getEntry();
                 public NetworkTableEntry armD = armPID.addPersistent("armPID-D", 0).getEntry();
 
-            private ShuffleboardLayout armValues = armTune.getLayout("armTune", BuiltInLayouts.kList);
+            private ShuffleboardLayout armValues = armTune.getLayout("armValues", BuiltInLayouts.kList);
                 public NetworkTableEntry armSpeed = armValues.addPersistent("armSpeed", 0).getEntry();
                 public NetworkTableEntry armSmooth = armValues.addPersistent("armSmooth", 0).getEntry();
+                public NetworkTableEntry armStartingPos = armValues.addPersistent("armStartingPos", 0).getEntry();
 
         private ShuffleboardLayout extentionTune = Tune.getLayout("extentionTune", BuiltInLayouts.kList);
             private ShuffleboardLayout extentionPID = extentionTune.getLayout("extentionPID", BuiltInLayouts.kList);
@@ -88,9 +90,10 @@ public class ShuffleBoard{
             private ShuffleboardLayout extentionValues = extentionTune.getLayout("extentionValues", BuiltInLayouts.kList);
                 public NetworkTableEntry extentionSpeed = extentionValues.addPersistent("extentionSpeed", 0).getEntry();
                 public NetworkTableEntry extentionSmooth = extentionValues.addPersistent("extentionSmooth", 0).getEntry();
+                public NetworkTableEntry extentionStartingPos = extentionValues.addPersistent("extentionStartingPos", 0).getEntry();
 
         private ShuffleboardLayout wristTune = Tune.getLayout("wristTune", BuiltInLayouts.kList);
-            private ShuffleboardLayout wristPID = wristTune.getLayout("wristTune", BuiltInLayouts.kList);
+            private ShuffleboardLayout wristPID = wristTune.getLayout("wristPID", BuiltInLayouts.kList);
                 public NetworkTableEntry wristP = wristPID.addPersistent("wristPID-P", 0).getEntry();
                 public NetworkTableEntry wristI = wristPID.addPersistent("wristPID-I", 0).getEntry();
                 public NetworkTableEntry wristD = wristPID.addPersistent("wristPID-D", 0).getEntry();
@@ -98,15 +101,22 @@ public class ShuffleBoard{
             private ShuffleboardLayout wristValues = wristTune.getLayout("wristValues", BuiltInLayouts.kList);
                 public NetworkTableEntry wristSpeed = wristValues.addPersistent("wristSpeed", 0).getEntry();
                 public NetworkTableEntry wristSmooth = wristValues.addPersistent("wristSmooth", 0).getEntry();
+                public NetworkTableEntry wristStartingPos = wristValues.addPersistent("wristStartingPos", 0).getEntry();
 
-        private ShuffleboardLayout vacuumTune = Tune.getLayout("vacuumTune", BuiltInLayouts.kList);
-            public NetworkTableEntry vacuumPumpSpeed = vacuumTune.addPersistent("vacuumPumpSpeed", 0).getEntry();
+        private ShuffleboardLayout vacuumCameraTune = Tune.getLayout("vacuumCameraTune", BuiltInLayouts.kList);
+            public NetworkTableEntry vacuumPumpSpeed = vacuumCameraTune.addPersistent("vacuumPumpSpeed", 0).getEntry();
+            public NetworkTableEntry cameraFrontAngle = vacuumCameraTune.addPersistent("cameraFrontAngle", 0).getEntry();
+            public NetworkTableEntry cameraBackAngle = vacuumCameraTune.addPersistent("cameraBackAngle", 0).getEntry();
+
 
         private ShuffleboardLayout outreachModeTune = Tune.getLayout("outreachModeTune", BuiltInLayouts.kList);
             public NetworkTableEntry outreachModeDriveSpeed = outreachModeTune.addPersistent("outreachModeDriveSpeed", 0).getEntry();
             public NetworkTableEntry outreachModeArmSpeed = outreachModeTune.addPersistent("outreachModeArmSpeed", 0).getEntry();
             public NetworkTableEntry outreachModeExtentionSpeed = outreachModeTune.addPersistent("outreachModeExtentionSpeed", 0).getEntry();
             public NetworkTableEntry outreachModeWristSpeed = outreachModeTune.addPersistent("outreachModeWristSpeed", 0).getEntry();
+            public NetworkTableEntry controllerID = outreachModeTune.addPersistent("controllerID", 0).getEntry();
+
+            
 
 
     public ShuffleboardTab Debug = Shuffleboard.getTab("Debug");
@@ -137,6 +147,10 @@ public class ShuffleBoard{
             public NetworkTableEntry wristLowerHardLimit = wristDebug.add("wristLowerHardLimit", false).getEntry();
             public NetworkTableEntry wristLowerSoftLimit = wristDebug.add("wristLowerSoftLimit", false).getEntry();
             public NetworkTableEntry wristGoto = wristDebug.add("wristGotoAngle", false).getEntry();
+
+        private ShuffleboardLayout driveDebug = Debug.getLayout("driveDebug", BuiltInLayouts.kList);
+            public NetworkTableEntry driveLeftOutput = driveDebug.add("driveLeftOutput", 0).getEntry();
+            public NetworkTableEntry driveRightOutput = driveDebug.add("driveRightOutput", 0).getEntry();
 
         private ShuffleboardLayout pneumaticDebug = Debug.getLayout("pneumaticDebug", BuiltInLayouts.kList);
             public NetworkTableEntry solenoidLiftExtend = pneumaticDebug.add("solenoidLiftExtend", false).getEntry();

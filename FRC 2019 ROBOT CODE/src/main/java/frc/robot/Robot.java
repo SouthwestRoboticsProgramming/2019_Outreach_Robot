@@ -13,6 +13,7 @@ import frc.robot.subsystems.ExtentionSubsystem;
 import frc.robot.subsystems.RobotClimbSubsystem;
 import frc.robot.subsystems.VacuumPumpSubsystem;
 import frc.robot.subsystems.WristSubsystem;
+import frc.robot.Auto.
 
 public class Robot extends TimedRobot {
   // Subsystem Instantiations
@@ -27,36 +28,65 @@ public class Robot extends TimedRobot {
   public static ShuffleBoard ShuffleBoard = new ShuffleBoard();
   public static Limelight Limelight = new Limelight();
   public static PDP PDP = new PDP();
-  public static OI oi;   
+  public static OI oi = new OI();
+
+  public static AutoModeExecutor mAutoModeExecutor;
+  // public static OI oi;   
 
   @Override
   public void robotInit() {
-    oi = new OI();
+    System.out.print("Initializing robot...");
     ShuffleBoard.init();
+    driveSubsystem.init();
+
+    double controllerID = ShuffleBoard.controllerID.getDouble(0);
+    if (controllerID == 0) {
+      oi.controller.setDefaultControllerSet(oi.threeJoy);
+    } else if (controllerID == 1) {
+      oi.controller.setDefaultControllerSet(oi.xbox);
+    }
+    armSubsystem.init();
+    extentionSubsystem.init();
+    WristSubsystem.init();
+    System.out.print("Robot Initialized");
   }
 
   @Override
-  public void disabledPeriodic() {
-    Scheduler.getInstance().run();
-  }
-
-  @Override
-  public void autonomousPeriodic() {
-    matchPeriodic();
-  }
-  
-   @Override
   public void teleopInit() {
-    
+    periodic();
   }
 
   @Override
   public void teleopPeriodic() {
-    Scheduler.getInstance().run();
-
+    periodic();
   }
 
-  public void matchPeriodic() {
-    Scheduler.getInstance().run();
+  @Override
+  public void autonomousInit() {
+    periodic();
   }
+
+  @Override
+  public void autonomousPeriodic() {
+    periodic();
+  }
+
+  @Override
+  public void testInit() {
+    periodic();
+  }
+
+  @Override
+  public void testPeriodic() {
+    periodic();
+  }
+
+  @Override
+  public void disabledPeriodic() {
+    periodic();
+  }
+
+  private void periodic() {
+    Scheduler.getInstance().run();
+}
 }

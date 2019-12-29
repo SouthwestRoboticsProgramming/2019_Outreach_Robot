@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.RobotMap;
-import frc.robot.commands.ManualVacuumPumpControl;
 
 public class VacuumPumpSubsystem extends Subsystem {
     public boolean tunable = false;
@@ -27,30 +26,27 @@ public class VacuumPumpSubsystem extends Subsystem {
 
     }
 
-  	// DRIVE THE PUMPS
-    public void vacuumPump(Boolean pumpOn, Boolean pumpOff) {
-
-        //pumps
-        if (pumpOn) { 
-            vacuumPumpMaster.set(Robot.ShuffleBoard.vacuumPumpSpeed.getDouble(RobotMap.defaultVacuumPumpSpeed));
+    // set pump output
+    public void setVacuum(double speed) {
+        vacuumPumpMaster.set(speed);
+        if (vacuumPumpMaster.get() == 0) {
             airEqualizerClose();
-        } else if (pumpOff) {
-            vacuumPumpMaster.set(0);
+        } else {
             airEqualizerOpen();
         }
         Robot.ShuffleBoard.vacuumPumpsOutput.setValue(vacuumPumpMaster.get());
     }
 
-    public void airEqualizerOpen() {
+    private void airEqualizerOpen() {
         Equalizer(false);
     }
   
-    public void airEqualizerClose() {
+    private void airEqualizerClose() {
     
         Equalizer(true);
     }
   
-    public void Equalizer(boolean state) {
+    private void Equalizer(boolean state) {
         vacuumSolenoid.set(state);
         Robot.ShuffleBoard.solenoidVacuumEqualizer.setValue(state);
     }
@@ -63,6 +59,6 @@ public class VacuumPumpSubsystem extends Subsystem {
 
 	@Override
 	public void initDefaultCommand() {
-      setDefaultCommand(new ManualVacuumPumpControl());
+    //   setDefaultCommand(new SetVacuum(0));
 	}
 }

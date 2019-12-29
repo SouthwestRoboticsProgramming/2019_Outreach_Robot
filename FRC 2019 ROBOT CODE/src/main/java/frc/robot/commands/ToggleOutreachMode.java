@@ -3,20 +3,19 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
 
-public class LiftRobot extends Command {
-  public LiftRobot() {
-   
+public class ToggleOutreachMode extends Command {
+  public ToggleOutreachMode() {
   }
 
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
+    Robot.oi.isOutreachMode = !Robot.oi.isOutreachMode;
   }
 
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
-    Robot.RobotClimbSubsystem.liftRobot();    
   }
 
   // Make this return true when this Command no longer needs to run execute()
