@@ -13,7 +13,6 @@ import frc.robot.subsystems.ExtentionSubsystem;
 import frc.robot.subsystems.RobotClimbSubsystem;
 import frc.robot.subsystems.VacuumPumpSubsystem;
 import frc.robot.subsystems.WristSubsystem;
-import frc.robot.Auto.
 
 public class Robot extends TimedRobot {
   // Subsystem Instantiations
@@ -29,9 +28,13 @@ public class Robot extends TimedRobot {
   public static Limelight Limelight = new Limelight();
   public static PDP PDP = new PDP();
   public static OI oi = new OI();
-
-  public static AutoModeExecutor mAutoModeExecutor;
   // public static OI oi;   
+
+  public enum ControlMode{
+    User,
+    Auto,
+    NoControl
+  }
 
   @Override
   public void robotInit() {

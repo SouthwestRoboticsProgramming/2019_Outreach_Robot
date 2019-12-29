@@ -1,6 +1,6 @@
 package frc.lib;
 import java.util.Calendar;
-
+// PID v1
 public class PID{
     private String name;
 
@@ -38,7 +38,18 @@ public class PID{
         this.i = i;
         this.d = d;
         this.name = name;
-	}
+    }
+    
+    /**
+	 * @param p The proportional gain coefficient.
+     * @param i The integral gain coefficient.
+     * @param d The derivative gain coefficient.
+	 */
+	public void setPID(double p, double i, double d){
+        this.p = p;
+        this.i = i;
+        this.d = d;
+    }
 
 	/**
 	 * @param p The proportional gain coefficient.
