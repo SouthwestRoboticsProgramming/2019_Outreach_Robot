@@ -68,8 +68,11 @@ public class MappedController {
         int count = -1;
         while (recallButton != button) {
             count++;
-            recallButton = buttons.get(count);
-            if (count > buttons.size()) {return -1;}
+            try {
+                recallButton = buttons.get(count);
+            } catch (Exception e) {
+                return -1;
+            }
         }
         return count;
     }
@@ -79,8 +82,11 @@ public class MappedController {
         int count = -1;
         while (recallAxis != axis) {
             count++;
-            recallAxis = this.axis.get(count);
-            if (count > this.axis.size()) {return -1;}
+            try {
+                recallAxis = this.axis.get(count);
+            } catch (Exception e) {
+                return -1;
+            }
         }
         return count;
     }

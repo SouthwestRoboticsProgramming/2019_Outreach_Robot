@@ -70,14 +70,20 @@ public class PresentPositions extends Command {
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
-    boolean armGoto = Robot.armSubsystem.armSetAngle(armPresetPosition / 100);
-    boolean extentionGoto = Robot.extentionSubsystem.extentionSetPosition(extentionPresetPosition / 100);
-    // Robot.WristSubsystem.wristSetAngle(wristPresetPosition / 100);
-    // Robot.WristSubsystem.wristPosition(Robot.oi.wristEncoder.get());
-    dateSeconds = (int)System.currentTimeMillis();
+    // boolean armGoto = Robot.armSubsystem.armSetAngle(armPresetPosition / 100);
+    // boolean extentionGoto = Robot.extentionSubsystem.extentionSetPosition(extentionPresetPosition / 100);
+    
+    // dateSeconds = (int)System.currentTimeMillis();
+    // if (!armGoto && !extentionGoto) {
+    //   presetPostitonGoto = true;
+    // }
 
-    // if (!Robot.armSubsystem.armGoto && !Robot.extentionSubsystem.extentionGoto && !Robot.WristSubsystem.wristGoto) {
-    if (!armGoto && !extentionGoto) {
+    boolean armGoto = Robot.armSubsystem.getGoingToPosition();
+    boolean extentionGoto = Robot.extentionSubsystem.getGoingToPosition();
+    boolean wristGoto = Robot.extentionSubsystem.getGoingToPosition();
+
+    dateSeconds = (int)System.currentTimeMillis();
+    if (!armGoto && !extentionGoto && !wristGoto) {
       presetPostitonGoto = true;
     }
 

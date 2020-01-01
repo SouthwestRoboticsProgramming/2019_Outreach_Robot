@@ -8,8 +8,6 @@ public class RobotMap {
     public static final int leftSlavePort = 0; //CAN port number
     public static final int rightMasterPort = 2; //CAN port number
     public static final int rightSlavePort = 1; //CAN port number
-    public static int buttonLineFollow = 1; //BUTTON number
-    public static int buttonRightDriveControl = 1; //BUTTON number
     public static final double defaultDriveSmooth = .5; //between 0 & 1, higher = less smoothing
     public static final double defaultDriveSpeed = 1; //between 0 & 1; higher=faster
 

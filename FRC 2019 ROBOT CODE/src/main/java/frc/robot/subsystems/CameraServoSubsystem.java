@@ -12,7 +12,7 @@ public class CameraServoSubsystem extends Subsystem {
   
   public CameraServoSubsystem(boolean tunable){
     this.tunable = tunable;
-
+    
     // SETUP SERVO
     cameraServo = new Servo(RobotMap.cameraServoPort);
   }

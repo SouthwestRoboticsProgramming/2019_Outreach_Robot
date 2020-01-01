@@ -30,7 +30,7 @@ public class Looper {
         if (!looping) {
             loop.onStart();
             looping = true;
-            looper(loop);
+            // looper(loop);
             
         }
     }

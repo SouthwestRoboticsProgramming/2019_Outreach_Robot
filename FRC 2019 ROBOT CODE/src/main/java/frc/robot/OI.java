@@ -38,18 +38,18 @@ public class OI {
         .mapButton(Buttons.retractArm, 3)
         .mapButton(Buttons.vacuumOff, 2)
         .mapButton(Buttons.vacuumOn, 1)
-        .mapAxis(Axis.armRotate, 0)
-        .mapAxis(Axis.wristRotate, 0);
+        .mapAxis(Axis.armRotate, 1)
+        .mapAxis(Axis.wristRotate, 2);
       left.mapButton(Buttons.deployRamps, 2)
         .mapButton(Buttons.liftRobot, 4)
         .mapButton(Buttons.limelightFollow, 1)
-        .mapAxis(Axis.leftDrive, 0);
+        .mapAxis(Axis.leftDrive, 1);
       right.mapButton(Buttons.cameraFaceFront, 3)
         .mapButton(Buttons.cameraFaceBack, 2)
-        .mapButton(Buttons.noArm, 0)
+        .mapButton(Buttons.noArm, 9)
         .mapButton(Buttons.outreachMode, 8)
         .mapButton(Buttons.rightControl, 1)
-        .mapAxis(Axis.rightDrive, 0);
+        .mapAxis(Axis.rightDrive, 1);
     xbox.addMappedController(xBox);
       xBox.mapAxis(Axis.centerDrive, 0)
       .mapAxis(Axis.turnDrive, 0)
@@ -60,6 +60,7 @@ public class OI {
       .mapButton(Buttons.quickTurn, 0)
       .mapButton(Buttons.vacuumOn, 0)
       .mapButton(Buttons.vacuumOff, 0);
+    controller.setDefaultControllerSet(threeJoy);
 
     controller.getButton(Buttons.preset1).whenPressed(new PresentPositions(1));
     controller.getButton(Buttons.preset2).whenPressed(new PresentPositions(2));
@@ -67,7 +68,7 @@ public class OI {
     controller.getButton(Buttons.preset4).whenPressed(new PresentPositions(4));
     controller.getButton(Buttons.preset5).whenPressed(new PresentPositions(5));
     controller.getButton(Buttons.preset6).whenPressed(new PresentPositions(6));
-    controller.getButton(Buttons.preset7).whenPressed(new PresentPositions(7));
+    // controller.getButton(Buttons.preset7).whenPressed(new PresentPositions(7));
 
     // LIFT / RAMPS
     controller.getButton(Buttons.liftRobot).whenPressed(new ToggleLiftRobot());

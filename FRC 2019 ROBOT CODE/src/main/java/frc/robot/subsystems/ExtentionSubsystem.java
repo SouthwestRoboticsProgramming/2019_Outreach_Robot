@@ -1,19 +1,23 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.command.Subsystem;
+import frc.lib.PID;
+import frc.lib.Looper.Looper;
+import frc.lib.Looper.Loop;
 import frc.robot.Robot;
 import frc.robot.RobotMap;
 import frc.robot.commands.ManualExtentionControl;
 
 public class ExtentionSubsystem extends Subsystem {
-
   public boolean tunable = false;
   private boolean init = false;
+  private boolean goingToPosition;
 
   private WPI_TalonSRX extentionMaster;
 
@@ -22,6 +26,9 @@ public class ExtentionSubsystem extends Subsystem {
   private final Encoder extentionEncoder;
 
   private final DigitalInput extentionLowerLimitSwitch;
+
+  private PID pid;
+  private Looper looper;
 
 	public ExtentionSubsystem(boolean tunable) {
     this.tunable = tunable;
@@ -37,7 +44,13 @@ public class ExtentionSubsystem extends Subsystem {
   }
 
   public void init() {
+    extentionMaster.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
     extentionMaster.setSelectedSensorPosition((int)Robot.ShuffleBoard.extentionStartingPos.getDouble(0));
+     // SETUP PID
+     double kp = Robot.ShuffleBoard.extentionP.getDouble(0);
+     double ki = Robot.ShuffleBoard.extentionI.getDouble(0);
+     double kd = Robot.ShuffleBoard.extentionD.getDouble(0);
+     pid = new PID(kp, ki, kd, "extention");
     init = true;
   }
 
@@ -49,37 +62,45 @@ public class ExtentionSubsystem extends Subsystem {
     return extentionEncoder.get();
   }
 
+  public boolean getGoingToPosition() {
+    return goingToPosition;
+  }
+
+  public void resetGoingToPosition( ) {
+    goingToPosition = true;
+  }
+
   //extention manual drive
   public void extendControl(double extentionControl, boolean extentionLimitBypass) {
-      final double offset = .1;
-      //set "extentionSpeed" to extend
-      double extentionSpeed;
-      if (extentionControl > 0) {
-        extentionSpeed = (extentionControl * Robot.ShuffleBoard.extentionSpeed.getDouble(RobotMap.defaultExtentionSpeed)) + offset;
-        // extentionSpeed = RobotMap.defaultExtentionSpeed + offset;
-      } else if (extentionControl < 0) {
-        extentionSpeed = (extentionControl * -Robot.ShuffleBoard.extentionSpeed.getDouble(RobotMap.defaultExtentionSpeed)) - offset;
-        // extentionSpeed = -RobotMap.defaultExtentionSpeed - offset;
-      } else {
-        extentionSpeed = 0;
-      }
-
-      //set extentionMove to extentionSpeed, plus calibration
-      double extentionMove = ((extentionSpeed) / 2);
-
-      if (Robot.oi.isOutreachMode) {
-        extentionMove = extentionMove * Robot.ShuffleBoard.extentionSmooth.getDouble(RobotMap.defaultExtentionSmooth);
-        // extentionMove = extentionMove * RobotMap.defaultExtentionSmooth;
-      }
-
-      //extention smoothing
-      double extentionFinal = getExtentionOutput() + ((extentionMove - getExtentionOutput()) * Robot.ShuffleBoard.extentionSmooth.getDouble(RobotMap.defaultExtentionSmooth));
-      // double extentionFinal = getExtentionOutput() + ((extentionMove - getExtentionOutput())* RobotMap.defaultExtentionSmooth);
-
-      //send extentionFinal to ouput
-      driveMoter(extentionFinal, extentionLimitBypass);
-   
+    final double offset = .1;
+    
+    double extentionSpeed;
+    if (extentionControl > 0) {
+      extentionSpeed = (extentionControl * Robot.ShuffleBoard.extentionSpeed.getDouble(RobotMap.defaultExtentionSpeed)) + offset;
+      // extentionSpeed = RobotMap.defaultExtentionSpeed + offset;
+    } else if (extentionControl < 0) {
+      extentionSpeed = (extentionControl * -Robot.ShuffleBoard.extentionSpeed.getDouble(RobotMap.defaultExtentionSpeed)) - offset;
+      // extentionSpeed = -RobotMap.defaultExtentionSpeed - offset;
+    } else {
+      extentionSpeed = 0;
     }
+
+    //set extentionMove to extentionSpeed, plus calibration
+    double extentionMove = ((extentionSpeed) / 2);
+
+    if (Robot.oi.isOutreachMode) {
+      extentionMove = extentionMove * Robot.ShuffleBoard.extentionSmooth.getDouble(RobotMap.defaultExtentionSmooth);
+      // extentionMove = extentionMove * RobotMap.defaultExtentionSmooth;
+    }
+
+    //extention smoothing
+    double extentionFinal = getExtentionOutput() + ((extentionMove - getExtentionOutput()) * Robot.ShuffleBoard.extentionSmooth.getDouble(RobotMap.defaultExtentionSmooth));
+    // double extentionFinal = getExtentionOutput() + ((extentionMove - getExtentionOutput())* RobotMap.defaultExtentionSmooth);
+
+    //send extentionFinal to ouput
+    driveMoter(extentionFinal, extentionLimitBypass);
+  
+  }
 
   // send extentionOutput to motor
   public void driveMoter(double extentionOutput, boolean extentionLimitBypass) {
@@ -132,7 +153,6 @@ public class ExtentionSubsystem extends Subsystem {
   }
 
   public boolean extentionSetPosition(double extentionPosition) {
-    
     //if extention is not at set position
     if (Math.abs(extentionPosition - getExtentionPosition()) > .05) {
       
@@ -170,6 +190,29 @@ public class ExtentionSubsystem extends Subsystem {
       return false;
     }
 
+  }
+
+  public void extentionPIDToAngle(double extentionPercent) {
+    int tolerance = 1;
+    goingToPosition = false;
+    Loop loop = new Loop(){
+      @Override public void onStart() {
+        pid.setSetPoint(extentionPercent);
+      }
+      @Override public void onLoop() {
+        if(Math.abs(getExtentionPosition() - extentionPercent) < tolerance) {
+          looper.stop();
+        }
+        pid.setActual(getExtentionPosition());
+        driveMoter(pid.getOutput(), false);
+      }
+      @Override public void onStop() {
+        driveMoter(0, false);
+        goingToPosition = false;
+      }
+    };
+    looper = new Looper(loop, 50);
+    looper.start();
   }
 
   public void stop() {

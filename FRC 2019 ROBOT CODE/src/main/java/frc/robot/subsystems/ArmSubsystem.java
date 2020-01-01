@@ -1,10 +1,14 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import frc.lib.Looper.Looper;
+import frc.lib.Looper.Loop;
 import frc.robot.Robot;
 import frc.robot.RobotMap;
 import frc.robot.commands.ManualArmControl;
@@ -12,6 +16,7 @@ import frc.robot.commands.ManualArmControl;
 public class ArmSubsystem extends Subsystem {
   public boolean tunable = false;
   private boolean init = false;
+  private boolean goingToPosition;
 
   private WPI_TalonSRX armMaster;
 
@@ -22,6 +27,8 @@ public class ArmSubsystem extends Subsystem {
 
   private DigitalInput armLowerLimitSwitch;
   private DigitalInput armUpperLimitSwitch;
+
+  private Looper looper;
 
 	public ArmSubsystem(boolean tunable) {
 		this.tunable = tunable;
@@ -35,13 +42,25 @@ public class ArmSubsystem extends Subsystem {
     // SETUP LIMITSWITCHES
     armLowerLimitSwitch = new DigitalInput(RobotMap.armLowerLimitSwitchPort);
     armUpperLimitSwitch = new DigitalInput(RobotMap.armUpperLimitSwitchPort);
-
-    // SETUP PID CONTROL IN SHUFFLEBOARD
-    
   }
 
   public void init() {
+    // armMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     armMaster.setSelectedSensorPosition((int)Robot.ShuffleBoard.armStartingPos.getDouble(0));
+    // armMaster.configNeutralDeadband(0.001);
+    // armMaster.setSensorPhase(true);
+    // armMaster.setInverted(false);
+
+    // armMaster.config_kP(0, Robot.ShuffleBoard.armP.getDouble(0));
+    // armMaster.config_kI(0, Robot.ShuffleBoard.armI.getDouble(0));
+    // armMaster.config_kD(0, Robot.ShuffleBoard.armD.getDouble(0));
+    // armMaster.config_kF(0, Robot.ShuffleBoard.armF.getDouble(0));
+
+    // armMaster.configForwardSoftLimitThreshold(1300);
+		// armMaster.configForwardSoftLimitEnable(true);
+		// armMaster.configReverseSoftLimitThreshold(0);
+		// armMaster.configReverseSoftLimitEnable(true);
+
     init = true;
   }
 
@@ -51,6 +70,14 @@ public class ArmSubsystem extends Subsystem {
 
   public double getArmOutput() {
     return armMaster.get();
+  }
+
+  public boolean getGoingToPosition() {
+    return goingToPosition;
+  }
+
+  public void resetGoingToPosition( ) {
+    goingToPosition = true;
   }
 
   //Manualy move arm
@@ -112,11 +139,12 @@ public class ArmSubsystem extends Subsystem {
       setBrake(true);
     }
 
-    armBrake(armOutput);
+    
 
     //send "armOutput" to motors
-    if (!Robot.oi.isNoArm || init) {
-      armMaster.set(armOutput);
+    if (!Robot.oi.isNoArm && init) {
+      armMaster.set(ControlMode.PercentOutput, armOutput);
+      armBrake(armOutput);
     } else {
       armMaster.set(0);
     }
@@ -179,6 +207,10 @@ public class ArmSubsystem extends Subsystem {
     return armPercentage;
   }
 
+  private double armAngleToTicks(double angle){
+    return ((-1) * armEncoderLowerLimit * angle) + (armEncoderUpperLimit * angle) + armEncoderLowerLimit;
+  }
+
   //sets the arm's angle for preset positions
   public boolean armSetAngle(double armPosition) {
     if (Math.abs(armPosition - getArmPercentage()) > .02) {
@@ -226,6 +258,29 @@ public class ArmSubsystem extends Subsystem {
       Robot.ShuffleBoard.armGoto.setValue(false);
       return false;
     }
+  }
+
+  //sets the arm's angle for preset positions
+  public void armPIDToAngle(double armPercent) {
+    double encodorTicks = armAngleToTicks(armPercent);
+    int tolerance = 1;
+    goingToPosition = false;
+    Loop loop = new Loop(){
+      @Override public void onStart() {
+        armMaster.set(ControlMode.Position, encodorTicks);
+      }
+      @Override public void onLoop() {
+        if (Math.abs(armMaster.getSelectedSensorPosition()-encodorTicks) < tolerance) {
+          looper.stop();
+        }
+      }
+      @Override public void onStop() {
+        armMaster.set(ControlMode.PercentOutput, 0);
+        goingToPosition = false;
+      }
+    };
+    looper = new Looper(loop, 50);
+    looper.start();
   }
 
   //stops motor

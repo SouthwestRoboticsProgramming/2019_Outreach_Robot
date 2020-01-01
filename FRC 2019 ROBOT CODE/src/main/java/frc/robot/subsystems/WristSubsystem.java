@@ -3,39 +3,32 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.command.Subsystem;
+import frc.lib.PID;
+import frc.lib.Looper.Looper;
+import frc.lib.Looper.Loop;
 import frc.robot.Robot;
 import frc.robot.RobotMap;
 import frc.robot.commands.ManualWristControl;
 
 public class WristSubsystem extends Subsystem {
-
   public boolean tunable = false;
   private boolean init = false;
+  private boolean goingToPosition;
 
   private WPI_TalonSRX wristMaster;
 
-  // private double wristPercentage; //between 0 & 100
-  // private double wristDifference; //between -1 & 1
-  // private double wristOutput; //between -1 & 1
-  // private double wristMove; //between -1 & 1
-  // private double wristFinal; //between -1 & 1
-
-  private double wristRawEncoder; //whole number
-  // private double wristEncoderUpperLimit; //whole number 
-  // private double wristEncoderLowerLimit; //whole number
-  private double wristOffset; //between -1 & 1
-  // private boolean wristUpperSet; // boolean
-  // private boolean wristLowerSet; // boolean
-
-  // private boolean wristGoto; //true when arm is moving to preset positions
+  private double wristOffset;
 
   private final Encoder wristEncoder;
 
   private final DigitalInput wristLowerLimitSwitch;
   private final DigitalInput wristUpperLimitSwitch;
+
+  private PID pid;
+  private Looper looper;
 
   public WristSubsystem(boolean tunable) {
   this.tunable = tunable;
@@ -52,7 +45,10 @@ public class WristSubsystem extends Subsystem {
 
   public void init() {
     wristMaster.setSelectedSensorPosition((int)Robot.ShuffleBoard.wristStartingPos.getDouble(0));
-    Robot.WristSubsystem.calibrateWrist();
+    double kp = Robot.ShuffleBoard.extentionP.getDouble(0);
+    double ki = Robot.ShuffleBoard.extentionP.getDouble(0);
+    double kd = Robot.ShuffleBoard.extentionP.getDouble(0);
+    pid = new PID(kp, ki, kd, "extention");
     init = true;
   }
 
@@ -74,6 +70,14 @@ public class WristSubsystem extends Subsystem {
 
   public double getWristOutput() {
     return wristMaster.get();
+  }
+
+  public boolean getGoingToPosition() {
+    return goingToPosition;
+  }
+
+  public void resetGoingToPosition( ) {
+    goingToPosition = true;
   }
 
   //Manualy move arm
@@ -149,7 +153,7 @@ public class WristSubsystem extends Subsystem {
 
   //get wrist percentage
   public double getWristPosition() {
-    wristRawEncoder = wristEncoder.get();
+    double wristRawEncoder = wristEncoder.get();
     double wristPercentage = ((wristRawEncoder / 650) + wristOffset);
     Robot.ShuffleBoard.wristPercent.setValue(wristPercentage);
     return wristPercentage;
@@ -192,6 +196,29 @@ public class WristSubsystem extends Subsystem {
       Robot.ShuffleBoard.wristGoto.setValue(false);
       return false;
     }
+  }
+
+  public void wristPIDToAngle(double wristPercent) {
+    int tolerance = 1;
+    goingToPosition = false;
+    Loop loop = new Loop(){
+      @Override public void onStart() {
+        pid.setSetPoint(wristPercent);
+      }
+      @Override public void onLoop() {
+        if(Math.abs(getWristPosition() - wristPercent) < tolerance) {
+          looper.stop();
+        }
+        pid.setActual(getWristPosition());
+        driveMoter(pid.getOutput(), false);
+      }
+      @Override public void onStop() {
+        driveMoter(0, false);
+        goingToPosition = false;
+      }
+    };
+    looper = new Looper(loop, 50);
+    looper.start();
   }
 
   //stops motor

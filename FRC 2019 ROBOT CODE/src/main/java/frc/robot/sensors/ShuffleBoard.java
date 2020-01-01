@@ -75,6 +75,7 @@ public class ShuffleBoard{
                 public NetworkTableEntry armP = armPID.addPersistent("armPID-P", 0).getEntry();
                 public NetworkTableEntry armI = armPID.addPersistent("armPID-I", 0).getEntry();
                 public NetworkTableEntry armD = armPID.addPersistent("armPID-D", 0).getEntry();
+                public NetworkTableEntry armF = armPID.addPersistent("armPID-F", 0).getEntry();
 
             private ShuffleboardLayout armValues = armTune.getLayout("armValues", BuiltInLayouts.kList);
                 public NetworkTableEntry armSpeed = armValues.addPersistent("armSpeed", 0).getEntry();
@@ -86,6 +87,7 @@ public class ShuffleBoard{
                 public NetworkTableEntry extentionP = extentionPID.addPersistent("extentionPID-P", 0).getEntry();
                 public NetworkTableEntry extentionI = extentionPID.addPersistent("extentionPID-I", 0).getEntry();
                 public NetworkTableEntry extentionD = extentionPID.addPersistent("extentionPID-D", 0).getEntry();
+                public NetworkTableEntry extentionF = extentionPID.addPersistent("extentionPID-F", 0).getEntry();
 
             private ShuffleboardLayout extentionValues = extentionTune.getLayout("extentionValues", BuiltInLayouts.kList);
                 public NetworkTableEntry extentionSpeed = extentionValues.addPersistent("extentionSpeed", 0).getEntry();
@@ -97,6 +99,7 @@ public class ShuffleBoard{
                 public NetworkTableEntry wristP = wristPID.addPersistent("wristPID-P", 0).getEntry();
                 public NetworkTableEntry wristI = wristPID.addPersistent("wristPID-I", 0).getEntry();
                 public NetworkTableEntry wristD = wristPID.addPersistent("wristPID-D", 0).getEntry();
+                public NetworkTableEntry wristF = wristPID.addPersistent("wristPID-F", 0).getEntry();
             
             private ShuffleboardLayout wristValues = wristTune.getLayout("wristValues", BuiltInLayouts.kList);
                 public NetworkTableEntry wristSpeed = wristValues.addPersistent("wristSpeed", 0).getEntry();

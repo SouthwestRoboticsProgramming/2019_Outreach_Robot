@@ -3,7 +3,7 @@ package frc.lib.Grid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.lib.PID;
-import frc.lib.Position;
+import frc.lib.Grid.Position;
 import frc.lib.TimeOutTimer;
 import frc.lib.Looper.Loop;
 import frc.lib.Looper.Looper;

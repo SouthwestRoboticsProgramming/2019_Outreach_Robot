@@ -27,8 +27,8 @@ public class Robot extends TimedRobot {
   public static ShuffleBoard ShuffleBoard = new ShuffleBoard();
   public static Limelight Limelight = new Limelight();
   public static PDP PDP = new PDP();
-  public static OI oi = new OI();
-  // public static OI oi;   
+  // public static OI oi = new OI();
+  public static OI oi;   
 
   public enum ControlMode{
     User,
@@ -39,57 +39,43 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     System.out.print("Initializing robot...");
+    oi = new OI();
     ShuffleBoard.init();
     driveSubsystem.init();
+    armSubsystem.init();
+    extentionSubsystem.init();
+    WristSubsystem.init();
+    System.out.print("Robot initialized");
+  }
 
+  @Override
+  public void disabledPeriodic() {
+    Scheduler.getInstance().run();
+  }
+
+  @Override
+  public void autonomousPeriodic() {
+    matchPeriodic();
+  }
+  
+   @Override
+  public void teleopInit() {
+    Robot.WristSubsystem.calibrateWrist();
     double controllerID = ShuffleBoard.controllerID.getDouble(0);
     if (controllerID == 0) {
       oi.controller.setDefaultControllerSet(oi.threeJoy);
     } else if (controllerID == 1) {
       oi.controller.setDefaultControllerSet(oi.xbox);
     }
-    armSubsystem.init();
-    extentionSubsystem.init();
-    WristSubsystem.init();
-    System.out.print("Robot Initialized");
-  }
-
-  @Override
-  public void teleopInit() {
-    periodic();
   }
 
   @Override
   public void teleopPeriodic() {
-    periodic();
-  }
-
-  @Override
-  public void autonomousInit() {
-    periodic();
-  }
-
-  @Override
-  public void autonomousPeriodic() {
-    periodic();
-  }
-
-  @Override
-  public void testInit() {
-    periodic();
-  }
-
-  @Override
-  public void testPeriodic() {
-    periodic();
-  }
-
-  @Override
-  public void disabledPeriodic() {
-    periodic();
-  }
-
-  private void periodic() {
     Scheduler.getInstance().run();
-}
+
+  }
+
+  public void matchPeriodic() {
+    Scheduler.getInstance().run();
+  }
 }

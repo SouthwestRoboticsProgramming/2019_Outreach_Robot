@@ -13,7 +13,7 @@ public class ControllerSet {
 
     public void addMappedController(MappedController... mappedController) {
         int count = 0;
-        while (count <= mappedController.length) {
+        while (count <= mappedController.length-1) {
             controllerSet.add(mappedController[count]);
             count++;
         }
@@ -25,11 +25,12 @@ public class ControllerSet {
             count++;
             if (controllerSet.get(count).checkForButton(button)) {
                return controllerSet.get(count).getButton(button);
-            } else if (count > controllerSet.size()) {
-                return new JoystickButton(new Joystick(10), 1);
+            } else if (count >= controllerSet.size()-1) {
+                return new JoystickButton(new Joystick(5), 20);
             }
             
         }
+        
     }
 
     public double getAxis(Axis axis) {
@@ -38,7 +39,7 @@ public class ControllerSet {
             count++;
             if (controllerSet.get(count).checkForAxis(axis)) {
                return controllerSet.get(count).getAxis(axis);
-            } else if (count > controllerSet.size()) {
+            } else if (count >= controllerSet.size()-1) {
                 return 0;
             }
             

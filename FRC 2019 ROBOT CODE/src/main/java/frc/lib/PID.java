@@ -2,10 +2,12 @@ package frc.lib;
 import java.util.Calendar;
 // PID v1
 public class PID{
-    private String name;
+    // log
+    private String name = "";
 
     // PID coefficients
-    private double p = 0, i = 0, d = 0;
+    private double p = 0, i = 0, d = 0, f = 0, fAngle = 0, fTPR = 0;
+    FType fType;
 
     // Dynamic variables
     private double lastUpdate = Double.NaN;
@@ -32,6 +34,20 @@ public class PID{
      * @param p The proportional gain coefficient.
      * @param i The integral gain coefficient.
      * @param d The derivative gain coefficient.
+     */
+	public PID(double p, double i, double d){
+        this.p = p;
+        this.i = i;
+        this.d = d;
+    }
+
+    /**
+     * Setup PID Control
+     * 
+     * @param p The proportional gain coefficient.
+     * @param i The integral gain coefficient.
+     * @param d The derivative gain coefficient.
+     * @param name The name shown when an error occurs.
      */
 	public PID(double p, double i, double d, String name){
         this.p = p;
@@ -64,8 +80,41 @@ public class PID{
 	/**
 	 * @param d The derivative gain coefficient.
 	 */
-	public void setD(double d){this.d = d;}
+    public void setD(double d){this.d = d;}
 
+    public enum FType {
+        fixed,
+        rotary
+    }
+
+    /**
+	 * @param type How f will be used based on how it is applied.
+     * @param value Value of f, when type is fixed.
+	 */
+    public void setF(FType type, double value){
+        fType = FType.fixed;
+        f = value;
+        
+    }
+
+    /**
+	 * @param type How f will be used based on how it is applied.
+     * @param value Value of f when type is rotary.
+     * @param angle Angle at which value was sampled. The closer f is to level (90 degrees), the more acorite f will be.
+     * @param ticksPerRevolution How many tick per revolution of encoder / gyro. 
+	 */
+    public void setF(FType type, double value, double angle, double ticksPerRevolution){
+        fType = FType.rotary;
+        f = value;
+        fAngle = angle;
+        fTPR = ticksPerRevolution;
+    }
+    
+    /**
+	 * @param name the name shown when an error occurs.
+	 */
+    public void setName(String name){this.name = name;}
+    
 	/**
 	 * Set max & min output.
 	 * @param minimum possible output value
@@ -95,15 +144,6 @@ public class PID{
 	public void setMaxOutputLimit(double maxOutput){
         setOutputLimits(maxOutput, minOutput);
 	}
-
-    /**
-	 * Sets how many pids are being added to total output. 
-     * Defaults to 1.
-	 * @param pids Amount of PIDs used. 
-	 */
-	public void setTotalPIDs(double pids){
-        setOutputLimits(maxOutput, minOutput);
-    }
 
 	/** 
 	 * Set the operating direction of the PID controller
@@ -201,8 +241,10 @@ public class PID{
             outputD = 0;
         }
 
+        double outputF = getF(actual);
+
         // calc sum of PID
-        double total = outputP + outputI + outputD;
+        double total = outputP + outputI + outputD + outputF;
         total = checkMinMax(total, minOutput, maxOutput);
         total = checkMaxChange(lastOutput, total, maxAcceleration / pids);
         if (inverted) {total = -total;}
@@ -268,6 +310,10 @@ public class PID{
         p = 0;
         i = 0;
         d = 0;
+        f = 0;
+        fAngle = 0;
+        fTPR = 0;
+        fType = FType.fixed;
         lastUpdate = Double.NaN;
         lastSetPoint = Double.NaN;
         lastError = 0;
@@ -296,6 +342,18 @@ public class PID{
     //-------------------------------------------- 
     // Private
     //--------------------------------------------
+
+    private double getF(double ticksAngle) {
+        if (fType == FType.fixed) {
+            return f;
+        } else if (fType == FType.rotary) {
+            double angle = ticksAngle / fTPR * 360;
+            double accountedF = f / Math.sin(Math.toRadians(fAngle));
+            return Math.sin(Math.toRadians(angle)) * accountedF;
+        } else {
+            return 0;
+        }
+    }
 
     private double checkMinMax(double var, double min, double max) {
         return Math.max(Math.min(var, max), min);
