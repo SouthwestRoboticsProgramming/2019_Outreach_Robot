@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.lib.Looper.Looper;
@@ -24,9 +23,6 @@ public class ArmSubsystem extends Subsystem {
 
   private Solenoid armBrakeSolenoid;
 
-  private DigitalInput armLowerLimitSwitch;
-  private DigitalInput armUpperLimitSwitch;
-
   private Looper looper;
 
 	public ArmSubsystem(boolean tunable) {
@@ -37,14 +33,9 @@ public class ArmSubsystem extends Subsystem {
 
     // SETUP BRAKE SOLENOID
     armBrakeSolenoid = new Solenoid(RobotMap.PCM, RobotMap.armBreakSolenoid);
-
-    // SETUP LIMITSWITCHES
-    armLowerLimitSwitch = new DigitalInput(RobotMap.armLowerLimitSwitchPort);
-    armUpperLimitSwitch = new DigitalInput(RobotMap.armUpperLimitSwitchPort);
   }
 
   public void init() {
-    // armMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     armMaster.setSelectedSensorPosition(-(int)Robot.ShuffleBoard.armStartingPos.getDouble(1300));
     armMaster.configNeutralDeadband(0.001);
     armMaster.setSensorPhase(true);

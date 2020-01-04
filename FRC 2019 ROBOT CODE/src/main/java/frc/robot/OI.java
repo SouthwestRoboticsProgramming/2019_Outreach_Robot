@@ -12,7 +12,6 @@ import frc.robot.commands.SetVacuum;
 import frc.robot.commands.ToggleLiftRobot;
 import frc.robot.commands.ToggleNoArm;
 import frc.robot.commands.ToggleOutreachMode;
-import frc.robot.sensors.ShuffleBoard;
 
 public class OI {
   public boolean isOutreachMode = false;

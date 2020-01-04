@@ -19,13 +19,6 @@ public class DriveSubsystem extends Subsystem {
 
 	private DifferentialDrive drive;
 
-	private enum mode {
-		closedLoop,
-		openLoop,
-		auto,
-		stopped,
-	}
-
 	public DriveSubsystem(boolean tunable) {
 		this.tunable = tunable;
 		//setup motors

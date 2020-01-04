@@ -2,7 +2,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
-import frc.robot.RobotMap;
 
 public class PresentPositions extends Command {
   public double armPresetPosition;
@@ -90,7 +89,6 @@ public class PresentPositions extends Command {
     // }
 
     boolean armGoto = Robot.armSubsystem.getGoingToPosition();
-    System.out.println("arm armGoto = " + armGoto);
     // boolean extentionGoto = Robot.extentionSubsystem.getGoingToPosition();
     // boolean wristGoto = Robot.extentionSubsystem.getGoingToPosition();
 

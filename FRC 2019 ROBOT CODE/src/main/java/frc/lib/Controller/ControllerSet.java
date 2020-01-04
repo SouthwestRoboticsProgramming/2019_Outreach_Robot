@@ -8,25 +8,38 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import frc.lib.Controller.Buttons;
 
 public class ControllerSet {
-    
+
+    private boolean enabled = false;
+    private boolean lockEnabled = false;
     private List<MappedController> controllerSet = new ArrayList<MappedController>();
 
     public void addMappedController(MappedController... mappedController) {
         int count = 0;
-        while (count <= mappedController.length-1) {
+        while (count <= mappedController.length - 1) {
             controllerSet.add(mappedController[count]);
             count++;
         }
+    }
+
+    public void setEnabled(boolean enabled) {
+        if (!lockEnabled) {
+            this.enabled = enabled;
+        }
+    }
+
+    public void lockEnabled(boolean lock) {
+        this.enabled = lock;
+        this.lockEnabled = true;
     }
 
     public JoystickButton getButton(Buttons button) {
         int count = -1;
         while (true) {
             count++;
-            if (controllerSet.get(count).checkForButton(button)) {
-               return controllerSet.get(count).getButton(button);
-            } else if (count >= controllerSet.size()-1) {
+            if (count >= controllerSet.size()-1 || !enabled) {
                 return new JoystickButton(new Joystick(5), 20);
+            } else if (controllerSet.get(count).checkForButton(button)) {
+               return controllerSet.get(count).getButton(button);
             }
             
         }
@@ -37,12 +50,11 @@ public class ControllerSet {
         int count = -1;
         while (true) {
             count++;
-            if (controllerSet.get(count).checkForAxis(axis)) {
-               return controllerSet.get(count).getAxis(axis);
-            } else if (count >= controllerSet.size()-1) {
+            if (count >= controllerSet.size()-1 || !enabled) {
                 return 0;
-            }
-            
+            } else if (controllerSet.get(count).checkForAxis(axis)) {
+               return controllerSet.get(count).getAxis(axis);
+            }   
         }
     }
 }

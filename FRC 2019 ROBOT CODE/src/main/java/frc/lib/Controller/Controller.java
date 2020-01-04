@@ -7,7 +7,11 @@ public class Controller {
     private ControllerSet controllerSet;
 
     public void setDefaultControllerSet(ControllerSet controllerSet) {
+        try {
+            this.controllerSet.setEnabled(false);
+        } catch (Exception e) {}
         this.controllerSet = controllerSet;
+        this.controllerSet.setEnabled(true);
     }
 
     public ControllerSet getDefaultControllerSet() {
