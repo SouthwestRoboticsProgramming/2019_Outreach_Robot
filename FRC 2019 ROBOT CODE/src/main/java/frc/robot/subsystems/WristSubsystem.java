@@ -7,8 +7,9 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.lib.PID;
-import frc.lib.Looper.Looper;
+import frc.lib.TimeOutTimer;
 import frc.lib.Looper.Loop;
+import frc.lib.Looper.Looper;
 import frc.robot.Robot;
 import frc.robot.RobotMap;
 import frc.robot.commands.ManualWristControl;
@@ -53,11 +54,17 @@ public class WristSubsystem extends Subsystem {
   }
 
   public void calibrateWrist() {
+    TimeOutTimer timer = new TimeOutTimer(1500);
     double previousPosition = getWristPosition();
     wristMaster.set(1);
-    while (wristUpperLimitSwitch.get()) {}
+    timer.start();
+    while (wristUpperLimitSwitch.get() && !timer.getTimedOut()) {}
+    timer.reset();
     wristMaster.set(-1);
-    while (wristLowerLimitSwitch.get()) {}
+    timer.start();
+    while (wristLowerLimitSwitch.get() && !timer.getTimedOut()) {}
+    timer.stop();
+    timer.reset();
     wristMaster.stopMotor();
     double currentPosition = getWristPosition();
     wristOffset = previousPosition - currentPosition + .1;
@@ -79,46 +86,31 @@ public class WristSubsystem extends Subsystem {
   public void resetGoingToPosition( ) {
     goingToPosition = true;
   }
-
-  //Manualy move arm
-  public void wristControl(double wristSpeed, boolean wristLimitBypass) {
-      double wristMove = ((-wristSpeed) / Robot.ShuffleBoard.wristSpeed.getDouble(RobotMap.defaultWristSpeed));
-
-      if (Robot.oi.isOutreachMode) {
-        wristMove = wristMove * Robot.ShuffleBoard.outreachModeWristSpeed.getDouble(RobotMap.defaultOutreachWristSpeed);
-      }
-
-      //Arm smoothing
-        double wristFinal = getWristOutput() + ((wristMove - getWristOutput()) * Robot.ShuffleBoard.wristSmooth.getDouble(RobotMap.defaultWristSmooth));
-      
-      //run driveMoter
-      driveMoter(wristFinal, wristLimitBypass);
-  }
   
   //sets arm output based on "armOutput" from sends
   public void driveMoter(double wristOutput, boolean wristLimitBypass) {
     
     //upper soft limit
-    if (getWristPosition() >= .8 && wristOutput >= 0 && wristLimitBypass) {
-        wristOutput = (wristOutput / (getWristPosition() * 2)); 
-        if (getWristPosition() >= 1) {
-          wristOutput = 0;
-          Robot.ShuffleBoard.wristUpperSoftLimit.setValue(true);
-        } else {
-          Robot.ShuffleBoard.wristUpperSoftLimit.setValue(false);
-        }
-    }
+    // if (getWristPosition() >= .8 && wristOutput >= 0 && wristLimitBypass) {
+    //     wristOutput = (wristOutput / (getWristPosition() * 2)); 
+    //     if (getWristPosition() >= 1) {
+    //       wristOutput = 0;
+    //       Robot.ShuffleBoard.wristUpperSoftLimit.setValue(true);
+    //     } else {
+    //       Robot.ShuffleBoard.wristUpperSoftLimit.setValue(false);
+    //     }
+    // }
 
-    //lower soft limit
-    if (getWristPosition() <= .2 && wristOutput <= 0 && wristLimitBypass) {
-      wristOutput = (wristOutput / (Math.abs(1 - getWristPosition()) * 2)); 
-      if (getWristPosition() <= 0) {
-        wristOutput = 0;
-        Robot.ShuffleBoard.wristLowerSoftLimit.setValue(true);
-      } else {
-        Robot.ShuffleBoard.wristLowerSoftLimit.setValue(false);
-      }
-    }
+    // lower soft limit
+    // if (getWristPosition() <= .2 && wristOutput <= 0 && wristLimitBypass) {
+    //   wristOutput = (wristOutput / (Math.abs(1 - getWristPosition()) * 2)); 
+    //   if (getWristPosition() <= 0) {
+    //     wristOutput = 0;
+    //     Robot.ShuffleBoard.wristLowerSoftLimit.setValue(true);
+    //   } else {
+    //     Robot.ShuffleBoard.wristLowerSoftLimit.setValue(false);
+    //   }
+    // }
 
     //send "armOutput" to motors
     if (!Robot.oi.isNoArm || init) {
@@ -126,7 +118,7 @@ public class WristSubsystem extends Subsystem {
     } else {
       wristMaster.set(0);
     }
-    Robot.ShuffleBoard.wristOutput.setValue(wristMaster.get());
+    Robot.ShuffleBoard.wristOutput.setValue(wristMaster.getMotorOutputPercent());
   }
 
   //sets default wrist upper encoder values

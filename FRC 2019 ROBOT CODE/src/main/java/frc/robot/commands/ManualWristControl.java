@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
+import frc.robot.RobotMap;
 
 public class ManualWristControl extends Command {
   public ManualWristControl() {
@@ -16,11 +17,20 @@ public class ManualWristControl extends Command {
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
-    Robot.WristSubsystem.wristControl(Robot.oi.wristControl(), !Robot.oi.wristExtentionlimitBypass());
-    Robot.WristSubsystem.wristEncoderUpperReset();
-    Robot.WristSubsystem.wristEncoderLowerReset();
+    double wristSpeed = Robot.oi.wristControl();
+    boolean wristLimitBypass = !Robot.oi.wristExtentionlimitBypass();
 
-    // Robot.WristSubsystem.wristControl(Robot.oi.joystickArm.getZ(), Robot.oi.wristUpperLimitSwitch.get(), Robot.oi.wristLowerLimitSwitch.get(), Robot.oi.wristExtentionlimitBypass.get(), Robot.oi.armLimitBypassWristLock.get());
+    double wristMove = ((-wristSpeed) / Robot.ShuffleBoard.wristSpeed.getDouble(RobotMap.defaultWristSpeed));
+
+    if (Robot.oi.isOutreachMode) {
+      wristMove = wristMove * Robot.ShuffleBoard.outreachModeWristSpeed.getDouble(RobotMap.defaultOutreachWristSpeed);
+    }
+
+    //Arm smoothing
+      double wristFinal = Robot.WristSubsystem.getWristOutput() + ((wristMove - Robot.WristSubsystem.getWristOutput()) * Robot.ShuffleBoard.wristSmooth.getDouble(RobotMap.defaultWristSmooth));
+    
+    //run driveMoter
+    Robot.WristSubsystem.driveMoter(wristFinal, wristLimitBypass);
       
   }
 

@@ -125,6 +125,7 @@ public class ShuffleBoard{
     public ShuffleboardTab Debug = Shuffleboard.getTab("Debug");
         private ShuffleboardLayout armDebug = Debug.getLayout("armDebug", BuiltInLayouts.kList);
             public NetworkTableEntry armPercent = armDebug.add("armPercent", 0).getEntry();
+            public NetworkTableEntry armEncoder = armDebug.add("armEncoder", 0).getEntry();
             public NetworkTableEntry armOutput = armDebug.add("armOutput", 0).getEntry();
             public NetworkTableEntry armUpperHardLimit = armDebug.add("armUpperHardLimit", false).getEntry();
             public NetworkTableEntry armUpperSoftLimit = armDebug.add("armUpperSoftLimit", false).getEntry();
@@ -135,6 +136,7 @@ public class ShuffleBoard{
 
         private ShuffleboardLayout extentionDebug = Debug.getLayout("extentionDebug", BuiltInLayouts.kList);
             public NetworkTableEntry extentionPercent = extentionDebug.add("extentionPercent", 0).getEntry();
+            public NetworkTableEntry extentionEncoder = extentionDebug.add("extentionEncoder", 0).getEntry();
             public NetworkTableEntry extentionOutput = extentionDebug.add("extentionOutput", 0).getEntry();
             public NetworkTableEntry extentionUpperHardLimit = extentionDebug.add("extentionUpperHardLimit", false).getEntry();
             public NetworkTableEntry extentionUpperSoftLimit = extentionDebug.add("extentionUpperSoftLimit", false).getEntry();

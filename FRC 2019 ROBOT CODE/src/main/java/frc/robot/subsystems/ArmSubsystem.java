@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -46,22 +45,24 @@ public class ArmSubsystem extends Subsystem {
 
   public void init() {
     // armMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
-    armMaster.setSelectedSensorPosition((int)Robot.ShuffleBoard.armStartingPos.getDouble(0));
-    // armMaster.configNeutralDeadband(0.001);
-    // armMaster.setSensorPhase(true);
-    // armMaster.setInverted(false);
+    armMaster.setSelectedSensorPosition(-(int)Robot.ShuffleBoard.armStartingPos.getDouble(1300));
+    armMaster.configNeutralDeadband(0.001);
+    armMaster.setSensorPhase(true);
+    armMaster.setInverted(false);
 
-    // armMaster.config_kP(0, Robot.ShuffleBoard.armP.getDouble(0));
-    // armMaster.config_kI(0, Robot.ShuffleBoard.armI.getDouble(0));
-    // armMaster.config_kD(0, Robot.ShuffleBoard.armD.getDouble(0));
-    // armMaster.config_kF(0, Robot.ShuffleBoard.armF.getDouble(0));
+    armMaster.config_kP(0, Robot.ShuffleBoard.armP.getDouble(0));
+    armMaster.config_kI(0, Robot.ShuffleBoard.armI.getDouble(0));
+    armMaster.config_kD(0, Robot.ShuffleBoard.armD.getDouble(0));
+    armMaster.config_kF(0, Robot.ShuffleBoard.armF.getDouble(0));
 
-    // armMaster.configForwardSoftLimitThreshold(1300);
-		// armMaster.configForwardSoftLimitEnable(true);
-		// armMaster.configReverseSoftLimitThreshold(0);
-		// armMaster.configReverseSoftLimitEnable(true);
+    armMaster.configForwardSoftLimitThreshold(1300);
+		armMaster.configForwardSoftLimitEnable(false);
+		armMaster.configReverseSoftLimitThreshold(0);
+		armMaster.configReverseSoftLimitEnable(false);
 
     init = true;
+
+
   }
 
   public double getArmRawEncoder() {
@@ -79,36 +80,17 @@ public class ArmSubsystem extends Subsystem {
   public void resetGoingToPosition( ) {
     goingToPosition = true;
   }
-
-  //Manualy move arm
-  public void armControl(double armSpeed, boolean armLimitBypass) {
-    double armMove = ((-armSpeed) * Robot.ShuffleBoard.armSpeed.getDouble(RobotMap.defaultArmSpeed));
-    // double armMove = ((-armSpeed) * RobotMap.defaultArmSpeed);
-
-    if (Robot.oi.isOutreachMode) {
-      armMove = armMove * Robot.ShuffleBoard.outreachModeArmSpeed.getDouble(RobotMap.defaultOutreachArmSpeed);
-      // armMove = armMove * RobotMap.defaultOutreachArmSpeed;
-    } 
-
-    //Arm smoothing
-    double armFinal = getArmOutput() + ((armMove - getArmOutput()) * Robot.ShuffleBoard.armSmooth.getDouble(RobotMap.defaultArmSmooth));
-    // double armFinal = getArmOutput() + ((armMove - getArmOutput()) * RobotMap.defaultArmSmooth);
-
-    //Start driveMorer, and armBrake
-    driveMoter(armFinal, armLimitBypass);
-  }
   
   //sets arm output based on "armOutput" from sends
   public void driveMoter(double armOutput, boolean armLimitBypass) {
-    
     //upper soft limit
     if (getArmPercentage() >= .8 && armOutput >= 0 && !armLimitBypass) {
-      armOutput = (armOutput / (getArmPercentage() * 2)); 
+      // armOutput = (armOutput * (-getArmPercentage() + 1) * 2); 
+      armOutput = Math.min(armOutput, .2);
       Robot.ShuffleBoard.armUpperSoftLimit.setValue(true);
     } else {
       Robot.ShuffleBoard.armUpperSoftLimit.setValue(false);
     }
-    
     //upper hard limit
     if (armOutput > 0 && getArmPercentage() >= 1 && !armLimitBypass) {
       armOutput = 0;
@@ -116,7 +98,6 @@ public class ArmSubsystem extends Subsystem {
     } else {
       Robot.ShuffleBoard.armUpperHardLimit.setValue(false);
     }
-
     //lower soft limit
     if (getArmPercentage() <= .2 && armOutput <= 0 && !armLimitBypass) {
       armOutput = (armOutput / (Math.abs(1 - getArmPercentage()) * 7)); 
@@ -124,7 +105,6 @@ public class ArmSubsystem extends Subsystem {
     } else {
       Robot.ShuffleBoard.armLowerSoftLimit.setValue(false);
     }
-
     //lower hard limit
     if (armOutput < 0 && getArmPercentage() <= 0 && !armLimitBypass) {
       armOutput = 0;
@@ -132,15 +112,11 @@ public class ArmSubsystem extends Subsystem {
     } else {
       Robot.ShuffleBoard.armLowerHardLimit.setValue(false);
     }
-
     //lower limit, to stop wires from being pinched, and the suction cup does not get jamed
     if (Robot.extentionSubsystem.getExtentionPosition() > .1 && Robot.extentionSubsystem.getExtentionPosition() < .9 && getArmPercentage() < .2 && armOutput <= .1) {
       armOutput = 0;
       setBrake(true);
     }
-
-    
-
     //send "armOutput" to motors
     if (!Robot.oi.isNoArm && init) {
       armMaster.set(ControlMode.PercentOutput, armOutput);
@@ -148,7 +124,7 @@ public class ArmSubsystem extends Subsystem {
     } else {
       armMaster.set(0);
     }
-    Robot.ShuffleBoard.armOutput.setValue(armMaster.get());
+    Robot.ShuffleBoard.armOutput.setValue(armMaster.getMotorOutputPercent());
   }
 
   //decides when the arm break should be applyed
@@ -168,8 +144,7 @@ public class ArmSubsystem extends Subsystem {
   }
 
   //resets arm encoder upper value when limit switch is pressed
-  public void armEncoderUpperReset(double joystick, double POV){
-    boolean upperLimit = armUpperLimitSwitch.get();
+  public void armEncoderUpperReset(boolean armBypass, double POV){
     boolean povUp;
     if (POV == 315 || POV == 0 || POV == 45) {
       povUp = true;
@@ -177,106 +152,53 @@ public class ArmSubsystem extends Subsystem {
       povUp = false;
     }
 
-    if (joystick >.1 && !upperLimit && povUp) {
+    if (armBypass && povUp) {
       armEncoderUpperLimit = getArmRawEncoder();
       armEncoderLowerLimit = getArmRawEncoder() + 1725;
     }
 
   }
 
-  //resets arm encoder lower value when limit switch is pressed
-  public void armEncoderLowerReset(double joystick, double POV){
-    boolean lowerLimit = armLowerLimitSwitch.get();
-    boolean povDown;
-    if (POV == 135 || POV == 180 || POV == 225) {
-      povDown = true;
-    } else {
-      povDown = false;
-    }
-
-    if (joystick < -.1 && !lowerLimit && povDown) {
-      armEncoderLowerLimit = getArmRawEncoder();
-    }
-  
-  }
-
   //gets the arm percentage (0-1) value from encoder
   public double getArmPercentage() {
     double armPercentage = ((armEncoderLowerLimit - getArmRawEncoder()) * (1/(armEncoderLowerLimit - armEncoderUpperLimit)));
     Robot.ShuffleBoard.armPercent.setValue(armPercentage);
+    Robot.ShuffleBoard.armEncoder.setValue(getArmRawEncoder());
     return armPercentage;
   }
 
-  private double armAngleToTicks(double angle){
-    return ((-1) * armEncoderLowerLimit * angle) + (armEncoderUpperLimit * angle) + armEncoderLowerLimit;
+  private Long armAngleToTicks(double angle){
+    // double unRounded = ((1725 * angle) + armEncoderUpperLimit);
+    // return Math.round(unRounded);
+    return Math.round((Math.abs(armEncoderLowerLimit * angle) + Math.abs(armEncoderUpperLimit * angle) * angle) + armEncoderUpperLimit);
   }
 
-  //sets the arm's angle for preset positions
-  public boolean armSetAngle(double armPosition) {
-    if (Math.abs(armPosition - getArmPercentage()) > .02) {
-      
-      //safty, incase the arm is set to o past 100%
-      if (armPosition > 100) {
-        armPosition = 100; 
-      } else if(armPosition < 0){
-      
-      }
-
-      //finds the diffrence between where the arm is set to go, and where it is
-      double armDifference = ((armPosition - getArmPercentage() + .02) * 3 );
-      
-      //stops the arm from hitting the motor when it moves back
-      if (getArmPercentage() >= .6 && armPosition >= 90) {
-
-        if (armDifference >= 0) {
-          armDifference = (armDifference / (getArmPercentage() * 2) + .05);
-        }
-      }
-
-      //does not allow the arm to move faseer than .6
-      if (armDifference >= .6) {
-        armDifference = .6;
-      } else if (armDifference <=-.6) {
-        armDifference = -.6;
-      }
-
-      //does not allow the arm to move slower than .1, so it can make it to its end point
-      if (armDifference <= .2 && armDifference > 0) {
-        armDifference = .2;
-      } else if (armDifference >=-.2 && armDifference < 0) {
-        armDifference = -.2;
-      }
-
-      //sends the arm's power to the moter
-      driveMoter(armDifference, false);
-      Robot.ShuffleBoard.armGoto.setValue(true);
-      return true;
-
-    //called when the arm is at set position
-    } else {
-      driveMoter(0, false);
-      Robot.ShuffleBoard.armGoto.setValue(false);
-      return false;
-    }
-  }
 
   //sets the arm's angle for preset positions
-  public void armPIDToAngle(double armPercent) {
-    double encodorTicks = armAngleToTicks(armPercent);
-    int tolerance = 1;
-    goingToPosition = false;
+  public void armPIDToAngle(double angle) {
+    System.out.println("setAngle = " + angle);
+    long encodorTicks = armAngleToTicks(angle);
+    int tolerance = 10;
+    goingToPosition = true;
+    setBrake(false);
     Loop loop = new Loop(){
+
       @Override public void onStart() {
         armMaster.set(ControlMode.Position, encodorTicks);
+        System.out.println("start");
       }
       @Override public void onLoop() {
-        if (Math.abs(armMaster.getSelectedSensorPosition()-encodorTicks) < tolerance) {
+        if (Math.abs(armMaster.getSelectedSensorPosition() - encodorTicks) < tolerance){
           looper.stop();
         }
+        System.out.println("loop");
+        System.out.println("encodorTicks = " + encodorTicks + " act = " + armMaster.getSelectedSensorPosition());
       }
       @Override public void onStop() {
+        System.out.println("end");
         armMaster.set(ControlMode.PercentOutput, 0);
         goingToPosition = false;
+        setBrake(true);
       }
     };
     looper = new Looper(loop, 50);

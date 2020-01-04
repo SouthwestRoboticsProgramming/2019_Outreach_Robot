@@ -60,13 +60,9 @@ public class Robot extends TimedRobot {
   
    @Override
   public void teleopInit() {
+    oi.init();
     Robot.WristSubsystem.calibrateWrist();
-    double controllerID = ShuffleBoard.controllerID.getDouble(0);
-    if (controllerID == 0) {
-      oi.controller.setDefaultControllerSet(oi.threeJoy);
-    } else if (controllerID == 1) {
-      oi.controller.setDefaultControllerSet(oi.xbox);
-    }
+    driveSubsystem.teleopInit();
   }
 
   @Override

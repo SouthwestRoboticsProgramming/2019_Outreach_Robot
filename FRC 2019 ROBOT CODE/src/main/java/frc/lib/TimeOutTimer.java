@@ -9,8 +9,8 @@ public class TimeOutTimer {
     private boolean timedOut = false;
 
     
-    public TimeOutTimer(long time) {
-        this.timeoutTime = time;
+    public TimeOutTimer(long ms) {
+        this.timeoutTime = ms;
     }
 
     public void start() {
@@ -37,6 +37,7 @@ public class TimeOutTimer {
 
     public void reset() {
         stop();
+        timer = new Timer();
         timedOut = false;
     }
  

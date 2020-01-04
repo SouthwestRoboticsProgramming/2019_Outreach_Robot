@@ -19,6 +19,13 @@ public class DriveSubsystem extends Subsystem {
 
 	private DifferentialDrive drive;
 
+	private enum mode {
+		closedLoop,
+		openLoop,
+		auto,
+		stopped,
+	}
+
 	public DriveSubsystem(boolean tunable) {
 		this.tunable = tunable;
 		//setup motors
@@ -58,13 +65,15 @@ public class DriveSubsystem extends Subsystem {
 		leftMaster.setSelectedSensorPosition(0);
 		rightMaster.setSelectedSensorPosition(0);
 
-		if (Robot.oi.controller.getDefaultControllerSet().equals(Robot.oi.threeJoy)) {
+		init = true;
+	}
+
+	public void teleopInit() {
+		if (Robot.oi.controller.getDefaultControllerSet() == Robot.oi.threeJoy) {
 			setDefaultCommand(new TwoJoyDrive());
 		} else {
 			setDefaultCommand(new OneJoyDrive());
 		}
-
-		init = true;
 	}
 
 	public double getLeftOutput() {
@@ -136,8 +145,8 @@ public class DriveSubsystem extends Subsystem {
 	public void driveMotors(double left, double right) {
 		if (init) {
 			drive.tankDrive(left, right);
-			Robot.ShuffleBoard.driveLeftOutput.setDouble(leftMaster.get());
-			Robot.ShuffleBoard.driveRightOutput.setDouble(rightMaster.get());
+			Robot.ShuffleBoard.driveLeftOutput.setDouble(leftMaster.getMotorOutputPercent());
+			Robot.ShuffleBoard.driveRightOutput.setDouble(rightMaster.getMotorOutputPercent());
 		}
 	}
 
@@ -148,5 +157,7 @@ public class DriveSubsystem extends Subsystem {
 	@Override
 	public void initDefaultCommand() {
 	}
+
+	
 
 }

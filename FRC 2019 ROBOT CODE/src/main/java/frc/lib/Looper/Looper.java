@@ -1,5 +1,6 @@
 package frc.lib.Looper;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Looper.Loop;
 
 public class Looper {
@@ -30,7 +31,7 @@ public class Looper {
         if (!looping) {
             loop.onStart();
             looping = true;
-            // looper(loop);
+            looper(loop);
             
         }
     }
@@ -48,7 +49,7 @@ public class Looper {
     private void looper(Loop loop) {
         new Thread(new Runnable() {
             public void run() {
-                while (looping){
+                while (looping && DriverStation.getInstance().isEnabled()){
                     loop.onLoop();
                     try {
                         Thread.sleep(loopTime);

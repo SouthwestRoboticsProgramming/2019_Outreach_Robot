@@ -12,6 +12,7 @@ import frc.robot.commands.SetVacuum;
 import frc.robot.commands.ToggleLiftRobot;
 import frc.robot.commands.ToggleNoArm;
 import frc.robot.commands.ToggleOutreachMode;
+import frc.robot.sensors.ShuffleBoard;
 
 public class OI {
   public boolean isOutreachMode = false;
@@ -24,6 +25,7 @@ public class OI {
       private MappedController right = new MappedController(2);
     public ControllerSet xbox = new ControllerSet();
       private MappedController xBox = new MappedController(0);
+      
   public OI() {
     threeJoy.addMappedController(manipulator, left, right);
       manipulator.mapButton(Buttons.armBypass, 6)
@@ -33,7 +35,7 @@ public class OI {
         .mapButton(Buttons.preset2, 8)
         .mapButton(Buttons.preset3, 9)
         .mapButton(Buttons.preset4, 10)
-        .mapButton(Buttons.preset5, 11)
+        .mapButton(Buttons.preset7, 11)
         .mapButton(Buttons.preset6, 12)
         .mapButton(Buttons.retractArm, 3)
         .mapButton(Buttons.vacuumOff, 2)
@@ -60,15 +62,26 @@ public class OI {
       .mapButton(Buttons.quickTurn, 0)
       .mapButton(Buttons.vacuumOn, 0)
       .mapButton(Buttons.vacuumOff, 0);
-    controller.setDefaultControllerSet(threeJoy);
+  }
 
+  public void controllerChooser() {
+    double controllerID = Robot.ShuffleBoard.controllerID.getDouble(0);
+    if (controllerID == 0) {
+      controller.setDefaultControllerSet(threeJoy);
+    } else if (controllerID == 1) {
+      controller.setDefaultControllerSet(xbox);
+    }
+  }
+
+  public void init() {
+    controllerChooser();
     controller.getButton(Buttons.preset1).whenPressed(new PresentPositions(1));
     controller.getButton(Buttons.preset2).whenPressed(new PresentPositions(2));
     controller.getButton(Buttons.preset3).whenPressed(new PresentPositions(3));
     controller.getButton(Buttons.preset4).whenPressed(new PresentPositions(4));
-    controller.getButton(Buttons.preset5).whenPressed(new PresentPositions(5));
+    // controller.getButton(Buttons.preset5).whenPressed(new PresentPositions(5));
     controller.getButton(Buttons.preset6).whenPressed(new PresentPositions(6));
-    // controller.getButton(Buttons.preset7).whenPressed(new PresentPositions(7));
+    controller.getButton(Buttons.preset7).whenPressed(new PresentPositions(7));
 
     // LIFT / RAMPS
     controller.getButton(Buttons.liftRobot).whenPressed(new ToggleLiftRobot());
@@ -129,8 +142,9 @@ public class OI {
   // EXTENTION
   public double extentionControl() {
     double output = 0;
-    if (controller.getButton(Buttons.extendArm).get()) {output += 1;}
-    if (controller.getButton(Buttons.retractArm).get()) {output -= 1;}
+    double speed = Robot.ShuffleBoard.extentionSpeed.getDouble(0);
+    if (controller.getButton(Buttons.extendArm).get()) {output = speed;}
+    if (controller.getButton(Buttons.retractArm).get()) {output = -speed;}
     return output;
   }
 

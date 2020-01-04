@@ -11,4 +11,8 @@ public class Lib{
     public double diffOfNumbers(double a, double b){
         return Math.abs(a-b);
     }
+
+    public double setRange(double var, double min, double max) {
+        return Math.max(Math.min(var, max), min);
+    }
 }

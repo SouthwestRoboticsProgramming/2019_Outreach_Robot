@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
+import frc.robot.RobotMap;
 
 public class ManualExtentionControl extends Command {
   public ManualExtentionControl() {
@@ -16,10 +17,35 @@ public class ManualExtentionControl extends Command {
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
+    double extentionControl = Robot.oi.extentionControl();
+    boolean extentionLimitBypass = Robot.oi.wristExtentionlimitBypass();
+    final double offset = .15;
 
-    Robot.extentionSubsystem.extendControl(Robot.oi.extentionControl(), Robot.oi.wristExtentionlimitBypass());
+    double extentionSpeed;
+    if (extentionControl != 0) {
+      extentionSpeed = (extentionControl * Robot.ShuffleBoard.extentionSpeed.getDouble(RobotMap.defaultExtentionSpeed));
+    } else {
+      extentionSpeed = 0;
+    }
+
+    if (extentionSpeed > 0) {
+      extentionSpeed += offset;
+    } else if (extentionSpeed < 0){
+      extentionSpeed -= offset;
+    }
+
+    if (Robot.oi.isOutreachMode) {
+      extentionSpeed *= Robot.ShuffleBoard.outreachModeExtentionSpeed.getDouble(RobotMap.defaultOutreachExtentionSpeed);
+      // extentionMove = extentionMove * RobotMap.defaultExtentionSmooth;
+    }
+
+    //extention smoothing
+    double extentionFinal = Robot.extentionSubsystem.getExtentionOutput() + ((extentionSpeed - Robot.extentionSubsystem.getExtentionOutput()) * Robot.ShuffleBoard.extentionSmooth.getDouble(RobotMap.defaultExtentionSmooth));
+    // double extentionFinal = getExtentionOutput() + ((extentionMove - getExtentionOutput())* RobotMap.defaultExtentionSmooth);
+
+    //send extentionFinal to ouput
+    Robot.extentionSubsystem.driveMoter(extentionFinal, extentionLimitBypass);
     Robot.extentionSubsystem.extentionEncoderLowerReset();
-
   }
 
   // Make this return true when this Command no longer needs to run execute()
