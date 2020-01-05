@@ -1,0 +1,44 @@
+[
+  {
+    "artifact": "frcJava (in project FRC 2019 PRACTICE)",
+    "target": "roborio",
+    "debugfile": "frcJava_roborio.debugconfig",
+    "project": "FRC 2019 PRACTICE",
+    "language": "java"
+  },
+  {
+    "artifact": "frcJava (in project FRC 2019 ROBOT BLIND UPDATE)",
+    "target": "roborio",
+    "debugfile": "frcJava_roborio.debugconfig",
+    "project": "FRC 2019 ROBOT BLIND UPDATE",
+    "language": "java"
+  },
+  {
+    "artifact": "frcJava (in project FRC 2019 ROBOT UNTESTED Controller)",
+    "target": "roborio",
+    "debugfile": "frcJava_roborio.debugconfig",
+    "project": "FRC 2019 ROBOT UNTESTED Controller",
+    "language": "java"
+  },
+  {
+    "artifact": "frcJava (in project FRC 2019 ROBOT UNTESTED)",
+    "target": "roborio",
+    "debugfile": "frcJava_roborio.debugconfig",
+    "project": "FRC 2019 ROBOT UNTESTED",
+    "language": "java"
+  },
+  {
+    "artifact": "frcJava (in project FRC 2019 ROBOT)",
+    "target": "roborio",
+    "debugfile": "frcJava_roborio.debugconfig",
+    "project": "FRC 2019 ROBOT",
+    "language": "java"
+  },
+  {
+    "artifact": "frcJava (in project FRC 2019 TEST)",
+    "target": "roborio",
+    "debugfile": "frcJava_roborio.debugconfig",
+    "project": "FRC 2019 TEST",
+    "language": "java"
+  }
+]
