@@ -1,0 +1,28 @@
+subsystems:
+  drivetrain:
+    implemented: true
+    talons:
+      leftMain: 2
+      leftSlaveOne: 1
+      leftSlaveTwo: 3
+      rightMain: 7
+      rightSlaveOne: 5
+      rightSlaveTwo: 6
+  climber:
+    implemented: false
+  cargocollector:
+    implemented: false
+  birdbeak:
+    implemented: false
+  cargoshooter:
+    implemented: false
+  ledmanager:
+    implemented: false
+  cameramount:
+    implemented: false
+constants:
+  wheelbase: 25
+  ticksPerRev: 1025
+  ticksPerIn: 50
+  maxVel: 800
+  cheezyDrive: 0
